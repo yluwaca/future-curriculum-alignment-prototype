@@ -36,7 +36,7 @@ The public source repository does not automatically include the examiner/eSango 
 
 ## Reproducibility
 
-The controlled examiner/eSango package identifies the locked dataset and evaluated candidate with complete SHA-256 fingerprints and supplies the deidentified dataset, manifest, deterministic split membership, evaluation evidence, parameters, model card, official API evidence, committee report and checksum register. Row-level probabilities were not retained by the completed run, and the server-retained native model binary was not exposed by the official read-only API; these limitations are recorded rather than reconstructed. Public release `v1.0.0-thesis-prototype` freezes the corresponding code and documentation.
+The controlled examiner/eSango package identifies the locked dataset and evaluated candidate with complete SHA-256 fingerprints. A controlled reproducibility rerun over the same immutable 993-row snapshot retained row-level holdout and fold probabilities, exact split membership, the native rerun model artefact, software versions and checksums. F1 and confusion-matrix counts reproduced exactly; small differences in probability-sensitive metrics are reported transparently. Release `v1.0.1-thesis-evidence` freezes the complete evidence-export workflow.
 
 ## Citation
 
