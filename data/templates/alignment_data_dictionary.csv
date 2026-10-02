@@ -1,0 +1,20 @@
+field_name,type,required,description,allowed_values_or_format
+observation_id,string,true,Stable non-identifying observation identifier,unique
+group_id,string,true,Leakage group kept within one partition,non-empty
+observation_date,date,true,Date represented by the observation,ISO 8601
+evidence_cutoff_date,date,true,Latest evidence date available for the observation,ISO 8601 and not after observation_date
+final_alignment_label,integer,true,Retained ordinal alignment judgement,1|2|3|4|5
+label_basis,string,true,Basis on which the label was produced,independently_reviewed|researcher_proxy
+coding_protocol_version,string,true,Version of the coding rubric,non-empty
+coder_id_hash,string,true,Non-identifying digest for the coder or coding record,SHA-256 preferred
+source_document_hash,string,true,Digest binding the label to source evidence,SHA-256 preferred
+reviewer_count,integer,true,Number of reviewers represented by the final label,>=1
+independent_reviewers,boolean,true,Whether reviewers were independent,true|false
+adjudication_complete,boolean,true,Whether disagreement adjudication is complete,true|false
+is_synthetic,boolean,true,Whether the observation is synthetic,true|false
+curriculum_text,string,true,Curriculum evidence used to construct features,UTF-8 text
+labour_market_text,string,true,Labour-market evidence used to construct features,UTF-8 text
+source_id,string,true,Identifier linking to the governed source register,non-empty
+provenance,string,true,Traceable origin/version description,non-empty
+rights_status,string,true,Authorised access/redistribution classification,public|redistributable|examiner_only
+eligible,boolean,true,Predeclared eligibility decision,true|false

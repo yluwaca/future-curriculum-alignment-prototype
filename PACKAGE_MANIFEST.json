@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "generated_utc": "2026-10-02T05:31:18.286021+00:00",
+  "generated_utc": "2026-10-02T15:18:22.116162+00:00",
   "classification": "public_code_and_synthetic_demo_only",
   "empirical_data_included": false,
-  "file_count": 516,
+  "file_count": 521,
   "files": [
     {
       "path": ".env.example",
@@ -1866,6 +1866,11 @@
       "sha256": "64db75e09db752dc6cd45067e012c80e09720a41c43684061056a4cb4b69508d"
     },
     {
+      "path": "data/templates/alignment_data_dictionary.csv",
+      "bytes": 1697,
+      "sha256": "1fbd5d3974354acc5e644da84e89b7255d3ae8fcfe3a57ca0d9f96e34629e007"
+    },
+    {
       "path": "data/templates/curriculum_records.csv",
       "bytes": 237,
       "sha256": "b0a086034d3d5aa0fe61a195fecb13d3d8a25e5264eb846e2033a25783638321"
@@ -2156,6 +2161,11 @@
       "sha256": "ab222ba918d13138abc2d6c99660c4d7bd90750bdcb378b838e80159aba6b3f5"
     },
     {
+      "path": "docs/ALGORITHM_SPECIFICATION.md",
+      "bytes": 3565,
+      "sha256": "5262f0e4d774575e6a9a0f295e62c53a13e3be3416eba75fc26a3fed232f3687"
+    },
+    {
       "path": "docs/DATA_AVAILABILITY.md",
       "bytes": 1370,
       "sha256": "869aa06c09eaba59de6aab946f25ccb6e588a88e905c2eb6b7677b787354c599"
@@ -2224,6 +2234,11 @@
       "path": "docs/system_documentation/USER_GUIDE.md",
       "bytes": 19798,
       "sha256": "e2a615a6866ad320c7f85d54769e36f98df9b088f05efeb534bd1c1c7608919d"
+    },
+    {
+      "path": "docs/TECHNOLOGY_NEUTRAL_REPRODUCIBILITY.md",
+      "bytes": 5278,
+      "sha256": "fe8230682e5b3f03a9e6e9b917281e8519ba5f98992e612e5d10fed6651f1201"
     },
     {
       "path": "docs/windows-native-deployment.md",
@@ -2521,6 +2536,11 @@
       "sha256": "3c5b36af1dae4efaceb69b92886658ec9cbb58a0778125115bea822b4ab9b0eb"
     },
     {
+      "path": "scripts/build_research_deposit.py",
+      "bytes": 4635,
+      "sha256": "1681054e4ad9ed9af6ab145882e9070eb0f3a8cb345a9cfc01f50eb704a75587"
+    },
+    {
       "path": "scripts/generate_committee_pack_pdf.py",
       "bytes": 12085,
       "sha256": "3bfb40307df1ffcc18132b4ad12c12949d9b6d46de477fc2fba6ce84603a9a02"
@@ -2584,6 +2604,11 @@
       "path": "scripts/uat/nginx/conf/default.conf",
       "bytes": 927,
       "sha256": "13f38b7421de1c2a2db963d10c5cd7ab9a1f5ec491a62db9ae85682a92484321"
+    },
+    {
+      "path": "scripts/verify_research_deposit.py",
+      "bytes": 2663,
+      "sha256": "6dc7ad11a1b110e6e7db68507c646f56f8f5914b3049d314495b1196ea49b22f"
     }
   ]
 }
