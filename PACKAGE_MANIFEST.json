@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "generated_utc": "2026-10-02T15:18:22.116162+00:00",
+  "generated_utc": "2026-10-02T18:36:10.764835+00:00",
   "classification": "public_code_and_synthetic_demo_only",
   "empirical_data_included": false,
-  "file_count": 521,
+  "file_count": 535,
   "files": [
     {
       "path": ".env.example",
@@ -1856,6 +1856,71 @@
       "sha256": "ece5a17b86198f3df4bf5a8fc716ae98094d1f759b358d2c5fdc5f00d253b23a"
     },
     {
+      "path": "data/locked/examiner_esango_2026-10-02/algorithms/ALGORITHM_SPECIFICATION.md",
+      "bytes": 4201,
+      "sha256": "1746362ac12538cb7e89a6249fba305be687266f76ea40823fd342ae8e190afc"
+    },
+    {
+      "path": "data/locked/examiner_esango_2026-10-02/dataset/alignment_observations_deidentified.csv",
+      "bytes": 312830,
+      "sha256": "feec4be4c86af63fc57a287ec5501caeb77723f43250ddd3eaa647d7f0b1d51c"
+    },
+    {
+      "path": "data/locked/examiner_esango_2026-10-02/dataset/restricted_raw/alignment_labels_original_export.csv",
+      "bytes": 176547,
+      "sha256": "dd636ba1efe4bd7af04efde110346534790f28f1399fe516194165e64ee8da7e"
+    },
+    {
+      "path": "data/locked/examiner_esango_2026-10-02/evaluation/candidate_evaluation.json",
+      "bytes": 3806,
+      "sha256": "ab585192caa5881869f5a074711e8699791643babca42134c318d5803e428a69"
+    },
+    {
+      "path": "data/locked/examiner_esango_2026-10-02/evidence/committee_report.pdf",
+      "bytes": 12709,
+      "sha256": "f2bf23c71d11db63aca3aa2ec8318c921c546fff01f6b1ed05e1bba71611f5ae"
+    },
+    {
+      "path": "data/locked/examiner_esango_2026-10-02/metadata/alignment_data_dictionary.csv",
+      "bytes": 1697,
+      "sha256": "1fbd5d3974354acc5e644da84e89b7255d3ae8fcfe3a57ca0d9f96e34629e007"
+    },
+    {
+      "path": "data/locked/examiner_esango_2026-10-02/metadata/dataset_manifest.json",
+      "bytes": 1712,
+      "sha256": "d116e762af025fff95651cd6c26355430dc8eb3775b8122536fc32e6cc6d86b3"
+    },
+    {
+      "path": "data/locked/examiner_esango_2026-10-02/metadata/source_rights_register.csv",
+      "bytes": 1969,
+      "sha256": "1c6052bcb8c99c008a29014b917c46c2673f2af46a95a169806f65e4b111ff85"
+    },
+    {
+      "path": "data/locked/examiner_esango_2026-10-02/model/model_card.json",
+      "bytes": 1606,
+      "sha256": "bada0482b9f54cccffd368c3fca77dc0c7f646c59d3fc0680caab4f82e053826"
+    },
+    {
+      "path": "data/locked/examiner_esango_2026-10-02/model/model_parameters.json",
+      "bytes": 545,
+      "sha256": "519da737471d61301653ea89c04a1bb4ae62583b7c7ec64ba5695f1f1b5f293b"
+    },
+    {
+      "path": "data/locked/examiner_esango_2026-10-02/PACKAGE_STATUS.json",
+      "bytes": 1092,
+      "sha256": "0c9044cc5bb251a4453d5b977b0088642e1b82f1c692b2ab53e105d1389658f7"
+    },
+    {
+      "path": "data/locked/examiner_esango_2026-10-02/README.md",
+      "bytes": 1963,
+      "sha256": "90eb869a4248612177d329b3a9e26eeb28ff24b6ff5459c51f021f023bad608a"
+    },
+    {
+      "path": "data/locked/examiner_esango_2026-10-02/SHA256SUMS.txt",
+      "bytes": 1203,
+      "sha256": "cf631a16e4b00a453bf9dfd170767bd37a79a7a0ff877ae38bba2969032d65d4"
+    },
+    {
       "path": "data/locked/README.md",
       "bytes": 952,
       "sha256": "ff24f82d01b7dc681e39910f230c10bc0f47189bcd7c8340c023e0d42e1a5373"
@@ -2162,8 +2227,8 @@
     },
     {
       "path": "docs/ALGORITHM_SPECIFICATION.md",
-      "bytes": 3565,
-      "sha256": "5262f0e4d774575e6a9a0f295e62c53a13e3be3416eba75fc26a3fed232f3687"
+      "bytes": 4201,
+      "sha256": "1746362ac12538cb7e89a6249fba305be687266f76ea40823fd342ae8e190afc"
     },
     {
       "path": "docs/DATA_AVAILABILITY.md",
@@ -2237,8 +2302,8 @@
     },
     {
       "path": "docs/TECHNOLOGY_NEUTRAL_REPRODUCIBILITY.md",
-      "bytes": 5278,
-      "sha256": "fe8230682e5b3f03a9e6e9b917281e8519ba5f98992e612e5d10fed6651f1201"
+      "bytes": 5942,
+      "sha256": "a879dd38169d30d0bf91cfc8bdd628affbe115db87a06edc3335c587d9c83899"
     },
     {
       "path": "docs/windows-native-deployment.md",
@@ -2544,6 +2609,11 @@
       "path": "scripts/generate_committee_pack_pdf.py",
       "bytes": 12085,
       "sha256": "3bfb40307df1ffcc18132b4ad12c12949d9b6d46de477fc2fba6ce84603a9a02"
+    },
+    {
+      "path": "scripts/prepare_locked_alignment_dataset.py",
+      "bytes": 7440,
+      "sha256": "982942b30482e7b29d67529811a3fcd57ab66cde0171b1ca25680874a1dd9046"
     },
     {
       "path": "scripts/run_uat_evaluation.py",

@@ -20,16 +20,19 @@ OUTPUT: eligibility ledger containing included flag and exclusion reason
 
 For independently reviewed evidence, require at least two independent reviewers and completed adjudication. Researcher-proxy labels must be identified as exploratory and must not be pooled silently with independently reviewed labels.
 
-## B. Target construction
+## B. Target construction for the final application candidate
 
 ```text
-IF final_alignment_label >= 4:
+normalised_alignment_score = (final_alignment_label - 1) / 4
+IF normalised_alignment_score >= 0.35:
     target = 1
 ELSE:
     target = 0
 ```
 
-Retain the original ordinal label and target-rule version.
+For the deposited discrete labels, this means labels 3, 4 and 5 are positive; labels 1 and 2 are negative. Retain the original ordinal label and target-rule version. Do not confuse the `0.35` target-construction threshold with the final candidate probability operating threshold of `0.75`.
+
+The separate portable reference harness in `research_evaluation/run_locked_evaluation.py` uses `final_alignment_label >= 4`. It is a methodological reference and does not reproduce the reported XGBoost target unless its declared target rule is changed prospectively and recorded as a different run.
 
 ## C. Chronological grouped partition
 

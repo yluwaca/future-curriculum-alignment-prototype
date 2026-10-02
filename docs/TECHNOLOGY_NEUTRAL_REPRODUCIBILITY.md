@@ -71,6 +71,13 @@ target = 1 when final_alignment_label >= 4; otherwise target = 0
 
 The original 1–5 label must be retained so that another researcher can test alternative, declared target definitions without changing the deposited evidence.
 
+Two target rules must not be conflated:
+
+- The final application candidate `xgboost-20260930T134244` uses the normalised score `(final_alignment_label - 1) / 4` and a target threshold of `0.35`. With the deposited discrete labels, labels 3–5 are positive and labels 1–2 are negative. This produces 40 positive and 953 negative rows.
+- The separate portable reference harness currently uses `final_alignment_label >= 4`. Its results are methodological reference results and are not the reported application-candidate results.
+
+The application candidate's probability operating threshold is `0.75`; it is distinct from the `0.35` target-construction threshold.
+
 ## Split and leakage rules
 
 1. Keep all rows sharing a `group_id` in one partition.
