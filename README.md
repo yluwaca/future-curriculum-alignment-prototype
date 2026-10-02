@@ -36,7 +36,7 @@ The public source repository does not automatically include the examiner/eSango 
 
 ## Reproducibility
 
-The examiner/eSango package is intended to contain the locked dataset, manifest, split membership, retained predictions, candidate evaluation, model artefact, software versions, screenshots, committee report and SHA-256 register. These artefacts must refer to the same frozen evaluation run.
+The controlled examiner/eSango package identifies the locked dataset and evaluated candidate with complete SHA-256 fingerprints and supplies the deidentified dataset, manifest, deterministic split membership, evaluation evidence, parameters, model card, official API evidence, committee report and checksum register. Row-level probabilities were not retained by the completed run, and the server-retained native model binary was not exposed by the official read-only API; these limitations are recorded rather than reconstructed. Public release `v1.0.0-thesis-prototype` freezes the corresponding code and documentation.
 
 ## Citation
 

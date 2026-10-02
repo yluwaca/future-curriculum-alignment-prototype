@@ -12,7 +12,6 @@ REQUIRED = {
     "dataset/alignment_observations.csv",
     "metadata/dataset_manifest.json",
     "splits/split_membership.csv",
-    "evaluation/predictions.csv",
     "evaluation/metrics.json",
     "evaluation/candidate_evaluation.json",
     "model/model_card.json",
@@ -41,6 +40,11 @@ def main() -> int:
     for relative in sorted(REQUIRED):
         if not (root / relative).is_file():
             problems.append(f"missing required file: {relative}")
+
+    predictions = root / "evaluation" / "predictions.csv"
+    non_retention = root / "evaluation" / "predictions_non_retention.json"
+    if not predictions.is_file() and not non_retention.is_file():
+        problems.append("missing predictions.csv or an explicit predictions_non_retention.json declaration")
 
     checksum_path = root / "SHA256SUMS.txt"
     if checksum_path.is_file():
