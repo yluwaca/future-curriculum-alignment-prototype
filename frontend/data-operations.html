@@ -1,0 +1,1344 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FUTURE Data Operations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css?v=20260824a">
+\n</head>
+<body>
+
+  <div class="app" style="visibility:hidden">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <nav class="breadcrumbs" id="breadcrumbs"></nav>
+          <h2 id="pageTitle">Data Operations</h2>
+          <p id="pageSubtitle">Source ingestion, import queues, normalisation, quality checks, and processing.</p>
+        </div>
+        <div class="userbox">
+          <div class="usertext">
+            <strong id="userName">Loading</strong>
+            <span id="userEmail">Loading</span>
+          </div>
+          <button class="btn" id="changePasswordBtn">Change Password</button>
+          <button class="btn primary" id="refreshBtn">Refresh</button>
+          <button class="btn danger" id="logoutBtn">Logout</button>
+        </div>
+      </header>
+
+      <div id="statusBox" class="status">Loading dashboard data...</div>
+      <div id="toastContainer" class="toast-container"></div>
+      <section class="panel analyst-purpose">
+        <div class="panel-head">
+          <h3>Analyst workspace</h3>
+          <small>Prepare trusted evidence for expert and governance review</small>
+        </div>
+        <div class="empty" style="text-align:left">
+          Use Data Operations to ingest approved sources, monitor and correct processing, review data quality, create mapping and alignment-review tasks, and regenerate validated outputs. Analysts do not train or promote models, administer users, or make final curriculum decisions.
+        </div>
+      </section>
+      <div id="confirmModal" class="modal-overlay hidden">
+        <div class="modal-box">
+          <h3 id="confirmTitle">Confirm</h3>
+          <p id="confirmMessage">Are you sure?</p>
+          <div class="modal-actions">
+            <button class="btn" id="confirmCancelBtn">Cancel</button>
+            <button class="btn primary" id="confirmOkBtn">OK</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Password Modal -->
+      <div id="changePasswordModal" class="modal-overlay hidden">
+        <div class="modal-box">
+          <h3>Change Password</h3>
+          <label>Current Password</label>
+          <input type="password" id="cpCurrentPassword" placeholder="Enter current password" autocomplete="current-password">
+          <label>New Password</label>
+          <input type="password" id="cpNewPassword" placeholder="Enter new password (min 8 chars)" autocomplete="new-password">
+          <label>Confirm New Password</label>
+          <input type="password" id="cpConfirmPassword" placeholder="Confirm new password" autocomplete="new-password">
+          <div class="modal-actions">
+            <button class="btn" id="cpCancelBtn">Cancel</button>
+            <button class="btn primary" id="cpConfirmBtn">Change Password</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pipeline Job Selection Modal -->
+      <div id="pipelineJobModal" class="modal-overlay hidden">
+        <div class="modal-box" style="max-width:600px">
+          <h3>Select Ingestion Job to Process</h3>
+          <p>Choose a completed StatsSA ingestion job that has not been processed yet.</p>
+          <div id="pipelineJobList" style="max-height:300px;overflow-y:auto;margin-bottom:16px"></div>
+          <div id="pipelineJobEmpty" style="display:none;color:var(--text-secondary);font-size:14px;padding:12px 0">All completed StatsSA jobs have been processed.</div>
+          <div class="modal-actions">
+            <button class="btn" id="pipelineJobCancelBtn">Cancel</button>
+            <button class="btn primary" id="pipelineJobRunBtn" disabled>Process Selected</button>
+          </div>
+        </div>
+      </div>
+
+      <section id="executive" class="view active">
+        <div class="metrics">
+          <div class="metric"><span>Curriculum Records</span><strong id="metricDocuments">0</strong><small>Documents + programmes</small></div>
+          <div class="metric"><span>Skills Mapped</span><strong id="metricSkills">0</strong><small>Evidence mappings created</small></div>
+          <div class="metric"><span>Average Alignment</span><strong id="metricAlignment">0%</strong><small>Latest generated scores</small></div>
+          <div class="metric"><span>Pending Reviews</span><strong id="metricPending">0</strong><small>Human decisions required</small></div>
+        </div>
+        <div class="grid">
+          <div class="panel span-7">
+            <div class="panel-head"><h3>Recommendation Priorities</h3><small id="recommendationCount">0 total</small></div>
+            <div id="recommendationPriorityBars" class="bar-list"></div>
+            <div id="spinnerRecommendationPriorities" class="spinner-wrap hidden"><div class="spinner"></div><span>Loading...</span></div>
+          </div>
+          <div class="panel span-5">
+            <div class="panel-head"><h3>Pipeline Health</h3><small>Current repository state</small></div>
+            <div class="table-wrap">
+              <table>
+                <tbody id="pipelineHealthRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head"><h3>Latest Recommendations</h3><small>Review queue</small></div>
+            <div class="search-bar"><input id="recommendationSearch" placeholder="Filter by title, status, or priority..."></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Recommendation</th><th>Priority</th><th>Status</th><th>Evidence</th><th>Confidence</th><th>Action</th></tr></thead>
+                <tbody id="latestRecommendations"></tbody>
+              </table>
+            </div>
+            <div id="recommendationPagination" class="pagination"></div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head"><h3>Recommendation Dossier</h3><small id="dossierCaption">Select a recommendation</small></div>
+            <div id="recommendationDossier" class="empty">Select a recommendation to review its evidence, forecast, explanations, and decision history.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="curriculum" class="view">
+        <div class="metrics">
+          <div class="metric"><span>Curriculum Records</span><strong id="curriculumDocuments">0</strong><small>Documents + programmes</small></div>
+          <div class="metric"><span>Programmes</span><strong id="curriculumVersions">0</strong><small>Imported qualifications</small></div>
+          <div class="metric"><span>Modules</span><strong id="curriculumChunks">0</strong><small>Normalised modules</small></div>
+          <div class="metric"><span>Quality Score</span><strong id="curriculumAvgQuality">-</strong><small>Completeness + extraction readiness</small></div>
+          <div class="metric"><span>Last Ingestion</span><strong id="curriculumLastIngestion">-</strong><small>Most recent import</small></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Curriculum Quality Notes</h3>
+            <small>Completeness checks and next actions</small>
+          </div>
+          <div id="curriculumQualityNotes" class="empty">Load curriculum quality summary to see completeness notes.</div>
+        </div>
+
+        <div class="panel" id="curriculumListPanel">
+          <div class="panel-head">
+            <h3>Curriculum Records</h3>
+            <small id="curriculumTableCaption">Most recent first</small>
+            <button class="btn" id="refreshCurriculumBtn">Refresh</button>
+          </div>
+          <div class="search-bar">
+            <input id="curriculumSearch" placeholder="Search by title, faculty, programme...">
+            <select id="curriculumStatusFilter">
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="archived">Archived</option>
+              <option value="pending">Pending</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Title</th><th>Faculty</th><th>Programme</th><th>Created</th><th>Record Type</th><th>Modules / Chunks</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="curriculumTable"></tbody>
+            </table>
+          </div>
+          <div id="curriculumPagination" class="pagination"></div>
+        </div>
+
+        <div id="curriculumDetailPanel" class="panel" style="display:none">
+          <div class="panel-head">
+            <h3 id="curriculumDetailTitle">Document Detail</h3>
+            <button class="btn" id="curriculumDetailClose">Back to list</button>
+          </div>
+          <div id="curriculumDetailContent"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Recent Ingestion Jobs</h3>
+            <small>Curriculum-related import activity</small>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Job ID</th><th>Source</th><th>Status</th><th>Records</th><th>Started</th></tr></thead>
+              <tbody id="curriculumJobRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+
+      <section id="systemDocumentation" class="view"><div class="panel"><div class="panel-head"><h3>Model Lab evidence and lifecycle</h3></div><p>Successful training creates an immutable <strong>candidate</strong> registry entry; it does not automatically make the model active. Candidate metrics, declared baselines, chronological cross-validation or walk-forward folds, threshold/calibration evidence, and TreeSHAP output remain visible even when promotion gates are blocked. Select a registry candidate, run <strong>Check Gates</strong>, attach genuine automated-test evidence, evaluate it, obtain the authorised approval, and only then promote it. Durable Model Jobs and Training Job Status show the same server-side jobs at detailed and summary levels. A synthetic development snapshot proves that the workflow executes, but its metrics must not be reported as empirical research findings.</p></div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3>System Documentation</h3>
+            <small>Chapter 4 working notes: portal purpose, model workflow, indicator interpretation, and validation process</small>
+          </div>
+          <div class="doc-grid">
+            <h4>1. Purpose of the FUTURE/PCLMAS portal</h4>
+            <p>FUTURE/PCLMAS is a curriculum-labour-market alignment artefact. Its purpose is to bring curriculum evidence, labour-market evidence, skill taxonomy evidence, forecast signals, and human review into one governed decision-support environment. The portal does not replace curriculum committees; it prepares evidence so that curriculum administrators, analysts, academics, and governance reviewers can make better-informed decisions.</p>
+            <p>The cleaned portal separates decision-facing views from operational and technical workspaces. Executive and curriculum users see evidence, readiness, recommendations, and decisions. Admin, analyst, and data-scientist users have access to ingestion, labelling, model training, source monitoring, and system operations according to RBAC.</p>
+
+            <h4>2. Main portal areas and intended audience</h4>
+            <table>
+              <thead><tr><th>Portal area</th><th>Primary audience</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td>Executive Dashboard</td><td>Executives, programme owners, committees</td><td>High-level readiness, alignment status, recommendations, pending reviews, and pipeline health.</td></tr>
+                <tr><td>Curriculum Dashboard</td><td>Curriculum administrators and analysts</td><td>View curriculum documents, imported programmes, modules, quality status, and recent curriculum ingestion activity.</td></tr>
+                <tr><td>Skill-Gap Dashboard</td><td>Curriculum analysts and reviewers</td><td>Inspect canonical skills, curriculum mappings, labour-market mappings, demand evidence, and gap candidates.</td></tr>
+                <tr><td>Forecast Dashboard</td><td>Analysts and authorised reviewers</td><td>Review generated forecasts, trend direction, model readiness, and forecast/recommendation quality.</td></tr>
+                <tr><td>Data Operations</td><td>Admin, Analyst, Data Scientist</td><td>Upload/feed source data, import and normalise it, validate evidence, label alignment tasks, and regenerate outputs.</td></tr>
+                <tr><td>Model Lab</td><td>Admin, Data Scientist</td><td>Create dataset snapshots, train candidate models, inspect metrics, record evidence, and manage model lifecycle decisions.</td></tr>
+                <tr><td>Governance Dashboard</td><td>Reviewers and audit users</td><td>Track recommendation decisions, feedback, evidence lineage, and human review history.</td></tr>
+                <tr><td>Reports</td><td>Committees and administrators</td><td>Export decision snapshots for meetings, evidence packs, and thesis/research documentation.</td></tr>
+                <tr><td>System Operations</td><td>Admin</td><td>Monitor service readiness, security, backups, deployment/UAT controls, and operational jobs.</td></tr>
+                <tr><td>User Admin</td><td>Admin</td><td>Approve users, assign roles, and maintain access governance.</td></tr>
+              </tbody>
+            </table>
+
+            <h4>3. Executive Dashboard interpretation</h4>
+            <p>The Executive Dashboard is the landing view for senior curriculum stakeholders. It summarises whether the system has enough evidence and processing output to support defensible recommendations. It should be interpreted as a readiness and decision-output page, not as a raw data-entry or technical troubleshooting page.</p>
+            <ul>
+              <li><strong>Curriculum Records</strong> counts uploaded curriculum documents and imported programme/module records.</li>
+              <li><strong>Skills Mapped</strong> counts evidence mappings created after curriculum or labour-market text has been linked to canonical skills.</li>
+              <li><strong>Average Alignment</strong> summarises generated alignment scores after processing has run.</li>
+              <li><strong>Pending Reviews</strong> counts recommendations that require human decision-making.</li>
+              <li><strong>Recommendation Priorities</strong> shows the executive action queue once recommendations exist.</li>
+              <li><strong>Pipeline Health</strong> separates data readiness from model output readiness, including ingestion jobs, labour facts, canonical signals, vector backend readiness, recommendations, and analytics records.</li>
+              <li><strong>Recommendation Dossier</strong> provides traceability for a selected recommendation: evidence, forecast context, explanation, and decision history.</li>
+            </ul>
+
+            <h4>4. Evidence flow from upload to decision</h4>
+            <p>The system follows a staged evidence pipeline. Source data is first uploaded or imported. It is then normalised into a common repository, linked to canonical skills, processed into alignment and forecast outputs, and finally converted into recommendations that require human review.</p>
+            <table>
+              <thead><tr><th>Stage</th><th>What happens</th><th>Portal location</th></tr></thead>
+              <tbody>
+                <tr><td>Source intake</td><td>Curriculum, StatsSA, CHE, ESCO, job-posting, or approved public/proxy datasets are uploaded or fetched.</td><td>Data Operations</td></tr>
+                <tr><td>Import / normalise</td><td>Raw files are parsed, cleaned, validated, and stored as model-ready records.</td><td>Data Operations</td></tr>
+                <tr><td>Skill extraction</td><td>Curriculum and labour-market evidence is mapped to canonical skills.</td><td>Data Operations / Skill-Gap Dashboard</td></tr>
+                <tr><td>Processing</td><td>Alignment scores, gap candidates, forecasts, recommendations, and analytics records are regenerated.</td><td>Data Operations</td></tr>
+                <tr><td>Human review</td><td>Recommendations and evidence are reviewed, approved, rejected, or sent for further action.</td><td>Recommendation Review / Governance Dashboard</td></tr>
+                <tr><td>Model validation</td><td>Reviewed labels are locked into a training snapshot and used to evaluate candidate models.</td><td>Data Operations / Model Lab</td></tr>
+              </tbody>
+            </table>
+
+            <h4>5. Alignment labelling and supervised model validation</h4>
+            <p>Alignment labelling is the human-supervised step required before the XGBoost alignment model can be trained honestly. Reviewers compare curriculum evidence against labour-market evidence and assign a 1&ndash;5 alignment label. These labels must be independent of model predictions; generated model scores are not shown to reviewers and must not be used as labels.</p>
+            <p>The labelling process is deliberately governed. A first reviewer labels a task, a second reviewer independently labels the same task, and disagreements require adjudication. Completed labels are locked into an immutable reviewed-label dataset. That locked dataset becomes the training and test evidence for supervised alignment modelling.</p>
+            <table>
+              <thead><tr><th>Label</th><th>Meaning</th><th>Interpretation</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>No alignment</td><td>The curriculum evidence does not cover the labour-market signal.</td></tr>
+                <tr><td>2</td><td>Weak alignment</td><td>The evidence is only indirectly related or too general.</td></tr>
+                <tr><td>3</td><td>Moderate alignment</td><td>Some relevant concepts are present, but coverage is partial.</td></tr>
+                <tr><td>4</td><td>Strong alignment</td><td>The curriculum clearly covers the skill area in meaningful detail.</td></tr>
+                <tr><td>5</td><td>Very strong alignment</td><td>The curriculum explicitly and deeply covers the skill, including applied competence.</td></tr>
+              </tbody>
+            </table>
+
+            <h4>6. Forecasting and LSTM readiness</h4>
+            <p>The forecasting component estimates future skill-demand direction from time-indexed evidence. Transparent baseline forecasts can run from current canonical signals, while the LSTM model requires longer historical sequences. A small time series can prove that the pipeline works, but it should not be over-interpreted as strong predictive evidence.</p>
+            <table>
+              <thead><tr><th>Data depth</th><th>Usefulness</th><th>Interpretation</th></tr></thead>
+              <tbody>
+                <tr><td>30&ndash;60 sequence rows</td><td>Prototype run</td><td>Confirms the training code executes; weak evidence for prediction.</td></tr>
+                <tr><td>100&ndash;200 sequence rows</td><td>Useful DEV evaluation</td><td>Allows basic walk-forward validation and baseline comparison.</td></tr>
+                <tr><td>300&ndash;500+ sequence rows</td><td>Better research evaluation</td><td>Supports more meaningful comparisons across skills and time windows.</td></tr>
+                <tr><td>1,000+ observations</td><td>Production-style evaluation</td><td>Better for stable forecasting, subgroup checks, and model governance.</td></tr>
+              </tbody>
+            </table>
+            <p>Recommended sources for time-indexed demand evidence include StatsSA QLFS across as many quarters/years as possible, CHE VitalStats for higher-education context, approved public job-posting exports with dates, and documented public proxy datasets where licensing permits use.</p>
+
+            <h4>7. Vector backend and semantic matching</h4>
+            <p>Semantic matching uses pgvector in PostgreSQL so that related concepts can be compared even when the exact wording differs. A healthy state appears as <strong>Vector Backend = pgvector</strong> with a ready badge. If pgvector is not available in a deployment environment, the system should report the backend as not ready rather than hiding the issue behind a fallback.</p>
+
+            <h4>8. Practical instructions</h4>
+            <p>This System Documentation page explains the model, portal areas, and research-facing interpretation. The operational sequence is: import official curriculum documents in <strong>Curriculum Documents</strong>, confirm the derived <strong>Subject Profile Validation</strong> records, import and normalise labour-market sources, generate evidence mappings, validate curriculum evidence, generate independent alignment-labelling tasks, lock the reviewed label dataset, then train/evaluate candidate models.</p>
+            <p><strong>Subject Profile Validation</strong> is the reporting clean-up step after upload. The reviewer confirms the institution, faculty, department, programme or qualification name, programme code, qualification type, subject code, subject name, evidence year, NQF level, credits, purpose and prerequisites. The original uploaded document and extracted chunks remain preserved; only the structured profile used for dashboards, recommendations and reporting is corrected. Validated profiles leave the default work queue. Rejected profiles are kept for audit and can be viewed with the rejected/all filters, but they should not be treated as active curriculum evidence.</p>
+            <p><strong>Curriculum Evidence Validation</strong> is the evidence-quality step. Reviewers inspect the extracted chunks shown in the validation window before approving a document version. If the text is unreadable, incomplete, from the wrong version, missing module/outcome evidence, or otherwise uncertain, the correct decision is <strong>Changes required</strong> or <strong>Rejected</strong>, with a short note describing what must be fixed.</p>
+            <p>Short expert notes are required because validation becomes part of the audit trail. If a reviewer agrees with the visible evidence, the note can be brief, for example: &quot;Evidence reviewed and accepted; source, extraction, modules and outcomes are adequate for labelling.&quot; Step-by-step instructions are maintained in the <strong>Help Manual</strong>.</p>
+          </div>
+        </div>
+      </section>
+
+
+      <section id="skills" class="view">
+        <div class="actions" style="margin-bottom:16px">
+          <button class="btn primary" id="runSkillExtractionBtn">Run Skill Extraction</button>
+          <button class="btn primary" id="runGapAnalysisBtn">Run Gap Analysis</button>
+          <button class="btn" id="refreshSkillsBtn">Refresh</button>
+          <small class="muted">Analyst actions: generate mappings and gaps after source data is loaded.</small>
+        </div>
+        <div class="metrics">
+          <div class="metric"><span>Canonical Skills</span><strong id="skillTotal">-</strong><small>DB reference catalogue</small></div>
+          <div class="metric"><span>Curriculum Mappings</span><strong id="skillCurriculumMappings">-</strong><small>Evidence from chunks</small></div>
+          <div class="metric"><span>Labour Mappings</span><strong id="skillLabourMappings">-</strong><small>Evidence from market data</small></div>
+          <div class="metric"><span>Demand Signals</span><strong id="skillDemandEvidence">-</strong><small>Labour-market evidence linked to skills</small></div>
+          <div class="metric"><span>Gaps Identified</span><strong id="skillGapCount">-</strong><small>Latest alignment gaps</small></div>
+        </div>
+        <div class="grid">
+          <div class="panel span-6">
+            <div class="panel-head"><h3>Skill Mapping Coverage</h3><small>Curriculum and labour mappings only</small></div>
+            <div id="skillCoverageBars" class="bar-list"><div class="empty">No mapping data loaded yet.</div></div>
+          </div>
+          <div class="panel span-6">
+            <div class="panel-head"><h3>Recent Mapping Evidence</h3><small>Latest curriculum/labour matches</small></div>
+            <div class="search-bar"><input id="skillMappingSearch" placeholder="Filter by domain or text..."></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Domain</th><th>Matched Text</th><th>Confidence</th></tr></thead>
+                <tbody id="skillMappingRows"></tbody>
+              </table>
+            </div>
+            <div id="skillMappingPagination" class="pagination"></div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head"><h3>Analysis Readiness</h3><small>Plain-language status before gap results are trusted</small></div>
+            <div id="skillGapReadinessPanel" class="empty">Load skill summary to see whether gap analysis is ready.</div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head">
+              <h3>Governance-Aware Skill Gaps</h3>
+              <small id="skillGapCaption">Latest preview from reviewed mapping evidence</small>
+            </div>
+            <div class="search-bar">
+              <input id="skillGapSearch" placeholder="Filter by skill name or key...">
+              <select id="skillGapTypeFilter">
+                <option value="">All gap types</option>
+                <option value="missing">Missing</option>
+                <option value="weak_alignment">Weak Alignment</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Skill</th><th>Gap Type</th><th>Demand</th><th>Forecast</th><th>Recommendation</th><th>Evidence</th></tr></thead>
+                <tbody id="skillGapRows"></tbody>
+              </table>
+            </div>
+            <div id="skillGapPagination" class="pagination"></div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head"><h3>Gap Evidence Drill-down</h3><small id="skillGapEvidenceCaption">Select a gap to inspect supporting evidence</small></div>
+            <div id="skillGapEvidencePanel" class="empty">Select Details from a skill gap to see curriculum evidence, labour-market trend evidence, and current job records.</div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head">
+              <h3>ESCO Skills &amp; Alignment Status</h3>
+              <small>ESCO coverage, semantic matching, human skill review, and alignment calibration</small>
+              <button class="btn" id="reloadSkillsValidityBtn">Reload</button>
+            </div>
+            <div id="skillsValidityPanel" class="empty">Loading skills status...</div>
+            <div id="spinnerSkillsValidity" class="spinner-wrap"><div class="spinner"></div><span>Loading skills status...</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="forecast" class="view">
+        <div class="actions" style="margin-bottom:16px">
+          <button class="btn" id="refreshForecastBtn">Refresh</button>
+        </div>
+        <div class="metrics">
+          <div class="metric"><span>Forecasts</span><strong id="forecastCount">-</strong><small>Generated outputs</small></div>
+          <div class="metric"><span>Increasing Trends</span><strong id="forecastIncreasing">-</strong><small>Demand pressure</small></div>
+          <div class="metric"><span>Average Confidence</span><strong id="forecastConfidence">-</strong><small>Baseline confidence</small></div>
+          <div class="metric"><span>Model Maturity</span><strong id="modelMaturity">-</strong><small id="modelMaturityCaption">Baseline status</small></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Forecast Interpretation</h3><small>What users can trust at this stage</small></div>
+          <div id="forecastInterpretationPanel" class="empty">Load forecasts to see interpretation guidance.</div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Forecast Model Readiness</h3><small>Baseline and ML promotion gates</small></div>
+          <div id="modelReadinessPanel" class="empty">Model readiness has not been loaded yet.</div>
+          <div id="spinnerModelReadiness" class="spinner-wrap hidden"><div class="spinner"></div><span>Loading model readiness...</span></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Forecast Quality</h3>
+            <small>Forecast confidence, model maturity, and known limitations</small>
+            <div class="actions">
+              <button class="btn" id="loadForecastQualityBtn">Load Quality Report</button>
+            </div>
+          </div>
+            <div id="forecastQualityPanel" class="empty">Load quality report to review forecast and recommendation quality.</div>
+            <div id="spinnerForecastQuality" class="spinner-wrap hidden"><div class="spinner"></div><span>Loading quality report...</span></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Forecast Outputs</h3><small>Skill demand projections</small></div>
+          <div class="search-bar"><input id="forecastSearch" placeholder="Filter by skill..."></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Skill</th><th>Baseline</th><th>Forecast</th><th>Trend</th><th>Confidence</th><th>Method</th><th>Type</th><th>Created</th><th></th></tr></thead>
+              <tbody id="forecastRows"></tbody>
+            </table>
+          </div>
+          <div id="forecastPagination" class="pagination"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Labour demand signals</h3><small>Generated from approved skill mappings on imported job-posting evidence</small></div>
+          <div id="adzunaTrialOutlookPanel" class="empty">No labour demand signals yet. Run the Labour-market Skill Pipeline, review mappings in Skills Alignment, then generate labour demand signals.</div>
+        </div>
+      </section>
+
+      <section id="modelLab" class="view">
+        <div class="panel">
+          <div class="panel-head"><h3>Model Lab</h3><small>ADMIN/DATA_SCIENTIST workspace for candidate training, evaluation evidence, and model lifecycle decisions.</small></div>
+          <div class="empty" style="text-align:left">This page is intentionally separated from viewer dashboards. Use it to train candidate models, review evaluation evidence, compare against baselines, and decide whether a candidate is rejected, approved, promoted, or rolled back. Training must create candidates first; active models must not be replaced without promotion gates.</div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Candidate Training &amp; Evaluation</h3><small>Training controls remain restricted; generated candidates must be evaluated before promotion.</small></div>
+          <div class="actions" style="margin-bottom:12px">
+            <button class="btn primary" id="runForecastsBtn">Run Baseline Forecasts</button>
+            <button class="btn" id="refreshRankingBtn">Dry-run Ranking</button>
+            <button class="btn" id="archivePredictionReportBtn">Save Quality Snapshot</button>
+            <button class="btn" id="runModelEvaluationBtn">Save Model Evaluation</button>
+          </div>
+          <div class="grid">
+            <div class="span-6" style="padding:8px">
+              <p><strong>XGBoost</strong><br><small id="xgboostLastTrained">Last trained: unknown</small></p>
+              <button class="btn primary" id="trainXgboostBtn">Train XGBoost</button>
+              <div id="xgboostSpinner" class="spinner-wrap hidden"><div class="spinner"></div><span>Training...</span></div>
+            </div>
+            <div class="span-6" style="padding:8px">
+              <p><strong>LSTM</strong><br><small id="lstmLastTrained">Last trained: unknown</small></p>
+              <button class="btn primary" id="trainLstmBtn">Train LSTM</button>
+              <div id="lstmSpinner" class="spinner-wrap hidden"><div class="spinner"></div><span>Training...</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Candidate Metrics &amp; Model History</h3><small>Current artifact metrics until the full registry is implemented</small></div>
+          <div id="modelMetricsPanel" class="empty">No trained model metrics loaded yet.</div>
+        </div>
+      </section>
+
+      <section id="dataOperations" class="view">
+        <div class="panel general-data-operations-intro">
+          <div class="panel-head"><h3>Data Operations</h3><small>ADMIN/ANALYST workspace for source ingestion, import queues, normalisation, quality checks, and processing.</small></div>
+          <div class="empty" style="text-align:left">Use this page to feed the system: upload curriculum evidence, import labour-market sources, normalise raw records, monitor ingestion jobs, run processing pipelines, and review failed/noisy records. Viewer dashboards consume the results but do not expose these controls.</div>
+        </div>
+        <div class="metrics">
+          <div class="metric"><span>Connector Types</span><strong id="qualityConnectors">0</strong><small>Registered source adapters</small></div>
+          <div class="metric"><span>Normalisers</span><strong id="qualityNormalisers">0</strong><small>Versioned payload shapers</small></div>
+          <div class="metric"><span>Education Context</span><strong id="qualityEducationContext">0</strong><small>CHE and sector supply sources</small></div>
+          <div class="metric"><span>Contracts</span><strong id="qualityContracts">0</strong><small>Versioned source expectations</small></div>
+          <div class="metric"><span>Cleaned Records</span><strong id="qualityCleaned">0</strong><small>Model-ready payloads</small></div>
+          <div class="metric"><span>Labour Trend Facts</span><strong id="qualityTrendFacts">0</strong><small>Structured market observations</small></div>
+          <div class="metric"><span>Canonical Signals</span><strong id="qualitySignals">0</strong><small>Forecast-ready demand indicators</small></div>
+          <div class="metric"><span>Failure Events</span><strong id="qualityFailureEvents">0</strong><small>Retry and audit trail</small></div>
+          <div class="metric"><span>Failed Checks</span><strong id="qualityFailed">0</strong><small>Issues needing review</small></div>
+          <div class="metric"><span>Average Quality</span><strong id="qualityScore">-</strong><small>Across checked jobs</small></div>
+        </div>
+        <div class="grid">
+          <div class="panel span-12">
+            <div class="panel-head">
+              <h3>Ingestion Data Quality</h3>
+              <small>Curriculum, job cleaning, StatsSA/CHE mapping, and review queue quality</small>
+              <button class="btn" id="loadIngestionDataQualityBtn">Load Quality Summary</button>
+            </div>
+            <div id="ingestionDataQualityPanel" class="empty">Load ingestion data quality summary to see current scores and next actions.</div>
+            <div id="spinnerIngestionDataQuality" class="spinner-wrap hidden"><div class="spinner"></div><span>Loading quality summary...</span></div>
+          </div>
+
+          <div class="panel span-12">
+            <div class="panel-head">
+              <h3>Input Layer Blueprint</h3>
+              <small>Tenant source to model-ready signal</small>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Layer</th><th>Implemented Control</th><th>Current State</th></tr></thead>
+                <tbody id="ingestionBlueprintRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head">
+              <h3>Source Imports</h3>
+              <small>Upload approved source data and track import progress</small>
+            </div>
+            <div class="import-grid">
+              <div class="import-box span-12">
+                <h4>Generic Source Intake</h4>
+                <span class="badge good">Universal input</span>
+                <p>Load taxonomy/reference data, job trends, current job evidence, or other supporting source data from a file, website link, or API endpoint. Use Curriculum Documents below for official curriculum files.</p>
+                <div class="import-controls">
+                  <label>Input mode<select id="genericIntakeMode">
+                    <option value="file">File upload</option>
+                    <option value="website">Website link</option>
+                    <option value="api">API endpoint</option>
+                  </select></label>
+                  <label>Source category<select id="genericSourceCategory">
+                    <option value="job_trends">Job trends</option>
+                    <option value="current_jobs">Current jobs</option>
+                    <option value="higher_education_context">Higher education context</option>
+                    <option value="taxonomy">Taxonomy/reference</option>
+                    <option value="other">Other</option>
+                  </select></label>
+                  <label>Known source<select id="genericSourceName">
+                    <option value="" disabled selected>Loading sources...</option>
+                  </select></label>
+                  <label>Other source<input id="genericOtherSourceName" placeholder="Describe if Other"></label>
+                </div>
+                <div class="import-controls">
+                  <label>File(s)<input id="genericFile" type="file" accept=".pdf,.xlsx,.xls,.csv,.txt,.json,.zip" multiple></label>
+                  <label style="font-size:11px;color:var(--text-secondary);align-self:end;">Hold Ctrl to select multiple files, or:</label>
+                  <label><a id="genericFolderBtn" href="#" style="font-size:12px;color:var(--accent);font-weight:600;">Select entire folder</a></label>
+                  <label>Website/API URL<input id="genericEndpointUrl" placeholder="https://..." style="display:none;"></label>
+                  <label>API method<select id="genericApiMethod" style="display:none;"><option value="GET">GET</option><option value="POST">POST</option></select></label>
+                </div>
+                <div id="genericFileList" style="font-size:12px;color:var(--muted);max-height:100px;overflow-y:auto;margin-bottom:12px;padding:6px 8px;border:1px dashed var(--border);border-radius:4px;display:none;"></div>
+                <div class="import-controls">
+                  <label>Description<textarea id="genericDescription" rows="3" placeholder="What is this source and what evidence should it provide?"></textarea></label>
+                  <label>POST JSON payload<textarea id="genericApiPayload" rows="3" placeholder='{"query":"ICT skills"}'></textarea></label>
+                </div>
+                <div class="check-row">
+                  <label><input id="genericRequiresAuth" type="checkbox"> Endpoint requires credentials</label>
+                </div>
+                <button class="btn primary" id="runGenericIntakeBtn">Upload Source</button>
+                <div class="inline-status" id="genericImportStatus"></div>
+                <div class="queue-panel" style="margin-top:16px;">
+                  <div class="panel-head" style="padding:0 0 10px 0;">
+                    <h4>Generic Import Queue</h4>
+                    <small>After upload, import and normalise ESCO, LinkedIn, job-trend, or other non-curriculum generic sources here.</small>
+                  </div>
+                  <div class="table-wrap">
+                    <table>
+                      <thead><tr><th>Source</th><th>Type</th><th>Status</th><th>Progress</th><th>Records</th><th>Action</th></tr></thead>
+                      <tbody id="genericImportQueueRows"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="import-box">
+                <h4>CHE VitalStats</h4>
+                <span class="badge good">Higher education context</span>
+                <p>Higher-education supply/context evidence from CHE public VitalStats publications.</p>
+                <div class="import-controls">
+                  <label>Start year<input id="cheStartYear" type="number" min="2000" max="2100" value="2020"></label>
+                  <label>End year<input id="cheEndYear" type="number" min="2000" max="2100" value="2022"></label>
+                  <label>Max files<input id="cheMaxFiles" type="number" min="1" max="100" value="2"></label>
+                  <label>Mode<input value="PDF" disabled></label>
+                </div>
+                <div class="check-row">
+                  <label><input id="cheDryRun" type="checkbox" checked> Discovery only</label>
+                  <label><input id="cheParse" type="checkbox"> Extract tables</label>
+                </div>
+                <button class="btn primary" id="runCheImportBtn">Import CHE VitalStats</button>
+                <div class="inline-status" id="cheImportStatus"></div>
+                <div class="queue-panel" style="margin-top:16px;">
+                  <div class="panel-head" style="padding:0 0 10px 0;">
+                    <h4>CHE Processing Queue</h4>
+                    <small>After CHE PDFs are loaded, normalise them here into higher-education context records.</small>
+                  </div>
+                  <div class="table-wrap">
+                    <table>
+                      <thead><tr><th>Job</th><th>Status</th><th>Progress</th><th>Records</th><th>Action</th></tr></thead>
+                      <tbody id="cheProcessingQueueRows"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="import-box">
+                <h4>StatsSA QLFS</h4>
+                <span class="badge warn">Labour market trends</span>
+                <p>Labour-market trend evidence from StatsSA QLFS PDFs using the same ingestion foundation.</p>
+                <div class="import-controls">
+                  <label>Start year<input id="statsStartYear" type="number" min="2000" max="2100" value="2020"></label>
+                  <label>End year<input id="statsEndYear" type="number" min="2000" max="2100" value="2025"></label>
+                  <label>Max files<input id="statsMaxFiles" type="number" min="1" max="100" value="24"></label>
+                  <label>Mode<input value="PDF" disabled></label>
+                </div>
+                <div class="check-row">
+                  <label><input id="statsDryRun" type="checkbox"> Discovery only</label>
+                  <label><input id="statsParse" type="checkbox" checked> Extract tables</label>
+                </div>
+                <button class="btn" id="runStatsImportBtn">Import StatsSA QLFS</button>
+                <div class="inline-status" id="statsImportStatus"></div>
+              </div>
+<div class="import-box">
+                <h4>Adzuna Live API</h4>
+                <p>Import South African vacancies using the configured Adzuna account. Page numbers, limits and date filters are applied safely on the server.</p>
+                <p class="muted">Adzuna South Africa data is used under written academic research permission (recorded 2026-09-10); attribution is required. Source: <a href="https://www.adzuna.co.za" target="_blank" rel="noopener">https://www.adzuna.co.za</a>.</p>
+                <div class="import-controls">
+                  <label>Search query<input id="adzunaWhat" value="developer"></label>
+                  <label>Location<input id="adzunaWhere" value="South Africa"></label>
+                  <label>Date from<input id="adzunaDateFrom" type="date"></label>
+                  <label>Date to<input id="adzunaDateTo" type="date"></label>
+                </div>
+                <div class="import-controls">
+                  <label>Page size<input id="adzunaPageSize" type="number" min="1" max="50" value="50"></label>
+                  <label>Start page<input id="adzunaPageStart" type="number" min="1" max="250" value="1"></label>
+                  <label>End page<input id="adzunaPageEnd" type="number" min="1" max="250" value="10"></label>
+                </div>
+                <p class="muted" id="adzunaEstimate" role="status"></p>
+                <div class="import-controls">
+                  <button class="btn" id="adzunaEstimateBtn">Preview request count</button>
+                  <button class="btn primary" id="adzunaImportPagesBtn">Import pages</button>
+                  <button class="btn" id="adzunaShowBtn">Show saved Adzuna posts</button>
+                  <button class="btn" id="adzunaClearBtn">Clear</button>
+                </div>
+                <div class="check-row" id="adzunaSafeModeRow" style="display:none">
+                  <label><input id="adzunaSafeConfirm" type="checkbox"> I confirm running <strong id="adzunaSafeCount"></strong> page requests to the Adzuna API.</label>
+                </div>
+                <p id="adzunaStatus" role="status" aria-live="polite"></p>
+                <div id="adzunaPosts"></div>
+              </div>
+              <div class="import-box">
+                <h4>Labour-market Skill Pipeline</h4>
+                <p>Run the labour-market skill pipeline on imported job-posting evidence, review skill mappings, and generate demand signals.</p>
+                <div class="import-controls">
+                  <label>Sources<input id="adzunaPipelineSources" value="adzuna"></label>
+                  <label>Run scope<input value="stored postings only" disabled></label>
+                </div>
+                <button class="btn primary" id="adzunaPipelineRunBtn">Run Labour-market Skill Pipeline</button>
+                <button class="btn" id="adzunaPipelineRefreshBtn">Refresh status</button>
+                <button class="btn" id="adzunaPipelineReviewLink" disabled>Review mappings in Skills Alignment</button>
+                <p id="adzunaPipelineStatus" role="status" aria-live="polite"></p>
+                <div id="adzunaPipelineRunSummary" class="empty">No labour-market skill pipeline run recorded yet.</div>
+                <div class="check-row">
+                  <button class="btn" id="adzunaPipelineSignalsBtn">Generate labour demand signals (approved mappings only)</button>
+                </div>
+                <div id="adzunaPipelineSignalsSummary"></div>
+              </div>
+              <div class="import-box">
+                <h4>Job Advert Dataset</h4>
+                <span class="badge warn">Current jobs</span>
+                <p>Upload approved job advert datasets while API access is pending. Record the exact provider and evidence role; public-sector proxy evidence must not be presented as the whole labour market.</p>
+                <div class="import-controls">
+                  <label>Source label<input id="jobAdvertSourceLabel" value="manual_dataset"></label>
+                  <label>Default region<input id="jobAdvertDefaultRegion" value="South Africa"></label>
+                  <label>Country<input id="jobAdvertDefaultCountry" value="ZA"></label>
+                  <label>Mode<input value="CSV/XLSX/JSON/TXT/PDF" disabled></label>
+                </div>
+                <div class="import-controls">
+                  <label>Job advert file<input id="jobAdvertFile" type="file" accept=".csv,.xlsx,.json,.txt,.pdf"></label>
+                </div>
+                <button class="btn" id="uploadJobAdvertBtn">Upload Job Adverts</button>
+                <div class="inline-status" id="jobAdvertImportStatus"></div>
+              </div>
+              <div class="import-box">
+                <h4>Curriculum Documents</h4>
+                <span class="badge good">Curriculum</span>
+                <p>Upload official curriculum evidence such as prospectuses, syllabi, module descriptors, study guides, or curriculum maps. Do not use Kaggle/ML training datasets here.</p>
+                <div class="import-controls">
+                  <label>Institution<input id="curriculumInstitution" value="CPUT"></label>
+                  <label>Faculty<input id="curriculumFaculty" placeholder="Optional"></label>
+                  <label>Department<input id="curriculumDepartment" placeholder="Optional"></label>
+                  <label>Programme<input id="curriculumProgramme" placeholder="Optional"></label>
+                </div>
+                <div class="import-controls">
+                  <label>Title<input id="curriculumTitle" placeholder="Document title"></label>
+                  <label>Document key<input id="curriculumDocumentKey" placeholder="Optional"></label>
+                  <label>Official curriculum file<input id="curriculumFile" type="file" accept=".pdf,.docx,.txt,.csv,.xlsx,.xls"></label>
+                  <label class="span-4">Selected file<div id="curriculumFilePreview" class="file-list" style="display:none"></div></label>
+                  <label>Evidence type<select id="curriculumEvidenceType">
+                    <option value="">Auto detect</option>
+                    <option value="study_guide">Study guide</option>
+                    <option value="syllabus">Syllabus</option>
+                    <option value="module_descriptor">Module descriptor</option>
+                    <option value="qualification_standard">Qualification standard</option>
+                    <option value="curriculum_map">Curriculum map</option>
+                    <option value="prospectus">Prospectus</option>
+                  </select></label>
+                  <label>Evidence year<input id="curriculumEvidenceYear" type="number" min="1900" max="2100" placeholder="e.g. 2023"></label>
+                  <label>Currency<select id="curriculumCurrencyStatus"><option value="unknown">Unknown</option><option value="current">Current</option><option value="historical">Historical</option><option value="expired">Expired</option><option value="unverified">Unverified</option></select></label>
+                  <label>Mode<input value="PDF/DOCX/TXT/CSV/XLSX/API" disabled></label>
+                </div>
+                <div class="actions" style="margin-bottom:12px">
+                  <button class="btn primary" id="uploadCurriculumBtn">Upload Curriculum File</button>
+                </div>
+                <div class="inline-status" id="curriculumImportStatus" role="status" aria-live="polite"></div>
+                <div class="import-controls">
+                  <label>API endpoint<input id="curriculumApiEndpoint" placeholder="https://..."></label>
+                  <label>Format<input id="curriculumApiFormat" value="auto"></label>
+                  <label>Username<input id="curriculumApiUsername" placeholder="If required" disabled></label>
+                  <label>Password<input id="curriculumApiPassword" type="password" placeholder="If required" disabled></label>
+                </div>
+                <div class="check-row">
+                  <label><input id="curriculumApiRequiresCredentials" type="checkbox"> API requires credentials</label>
+                </div>
+                <button class="btn" id="importCurriculumApiBtn">Import Curriculum API</button>
+                <div class="import-controls" style="margin-top:12px">
+                  <label>Discovery URL<input id="curriculumDiscoveryUrl" value="https://www.cput.ac.za/faculties/fid/courses"></label>
+                  <label>Institution<input id="curriculumDiscoveryInstitution" value="CPUT"></label>
+                  <label>Max links<input id="curriculumDiscoveryMaxLinks" type="number" min="1" max="250" value="50"></label>
+                  <label>Mode<input value="HTML/PDF discovery" disabled></label>
+                </div>
+                <button class="btn" id="discoverCurriculumSourcesBtn">Discover Curriculum Sources</button>
+                <div class="import-controls" style="margin-top:12px">
+                  <label>CPUT faculty code<input id="cputProspectusFacultyCode" value="220"></label>
+                  <label>Course codes<input id="cputProspectusCourseCodes" value="ADICTA" placeholder="Discover first, then choose codes"></label>
+                  <label>Max courses<input id="cputProspectusMaxCourses" type="number" min="1" max="200" value="4"></label>
+                  <label>Mode<input value="Online prospectus" disabled></label>
+                </div>
+                <button class="btn" id="discoverCputCoursesBtn">Discover CPUT Courses</button>
+                <button class="btn" id="importCputProspectusBtn">Import CPUT Prospectus</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head">
+              <h3>National-to-Institutional Curriculum Evidence Chain</h3>
+              <small>Verify legal, qualification, approval, registration, programme, and module evidence before interpreting alignment.</small>
+              <button class="btn" id="refreshCurriculumGovernanceBtn">Refresh Chain</button>
+            </div>
+            <div id="curriculumGovernanceSummary" class="empty" style="text-align:left">Loading curriculum governance evidence...</div>
+            <div class="table-wrap" style="margin-top:12px"><table>
+              <thead><tr><th>Layer</th><th>Authority / Evidence</th><th>Identifier</th><th>Currency</th><th>Verification</th><th>Scope</th><th>Source</th></tr></thead>
+              <tbody id="curriculumGovernanceRows"></tbody>
+            </table></div>
+            <details style="margin-top:16px">
+              <summary><strong>Add institution or programme evidence</strong></summary>
+              <p class="muted">Add CPUT-specific CHE accreditation, DHET PQM, SAQA registration, programme approval, or module evidence.</p>
+              <div class="import-controls">
+                <label>Programme<select id="governanceProgramme"><option value="">Select programme</option></select></label>
+                <label>Layer<select id="governanceLayer"><option value="che_accreditation">CHE programme accreditation</option><option value="dhet_pqm">DHET mandate / PQM</option><option value="saqa_registration">SAQA qualification registration</option><option value="institutional_programme">Institutional programme</option><option value="module_curriculum">Module curriculum</option><option value="che_standard">CHE qualification standard</option><option value="heqsf">HEQSF evidence</option></select></label>
+                <label>Authority<input id="governanceAuthority" placeholder="CHE, DHET, SAQA, or CPUT"></label>
+                <label>Evidence key<input id="governanceEvidenceKey" placeholder="cput-pgdict-saqa-12345"></label>
+                <label>Title<input id="governanceTitle" placeholder="Official evidence title"></label>
+                <label>Identifier<input id="governanceIdentifier" placeholder="SAQA ID, accreditation or PQM reference"></label>
+                <label>Version / year<input id="governanceVersion" placeholder="2023 or version label"></label>
+                <label>Official URL<input id="governanceUrl" type="url" placeholder="https://..."></label>
+                <label>NQF level<input id="governanceNqfLevel" type="number" min="1" max="10"></label>
+                <label>Credits<input id="governanceCredits" type="number" min="0" max="1000"></label>
+                <label>Currency<select id="governanceCurrency"><option value="unverified">Unverified</option><option value="current">Current</option><option value="historical">Historical</option><option value="expired">Expired</option><option value="unknown">Unknown</option></select></label>
+                <label>Verification<select id="governanceVerification"><option value="unverified">Unverified</option><option value="verified">Verified</option><option value="changes_required">Changes required</option><option value="rejected">Rejected</option></select></label>
+              </div>
+              <label>Notes<textarea id="governanceNotes" rows="3" placeholder="What was checked, what remains uncertain, and whether this can support current decisions."></textarea></label>
+              <button class="btn primary" id="addCurriculumGovernanceBtn">Save Evidence</button>
+              <div class="inline-status" id="curriculumGovernanceStatus"></div>
+            </details>
+          </div>
+                    <div class="panel span-12">
+            <div class="panel-head">
+              <h3>Subject Profile Validation</h3>
+              <small>Confirm reporting fields after upload: institution, faculty, department, programme, subject identity, NQF, credits and status. Original documents and chunks remain preserved.</small>
+              <div class="actions">
+                <select id="subjectProfileStatusFilter" aria-label="Filter subject profiles by validation status">
+                  <option value="active_review" selected>Needs review</option>
+                  <option value="needs_review">Needs review only</option>
+                  <option value="changes_required">Changes required</option>
+                  <option value="validated">Validated</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="all">All profiles</option>
+                </select>
+                <button class="btn" id="refreshSubjectProfilesBtn">Refresh Profiles</button>
+              </div>
+            </div>
+            <div id="subjectProfileValidationSummary" class="empty">Loading subject profiles...</div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Subject</th><th>Programme</th><th>Hierarchy</th><th>Year</th><th>NQF / Credits</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="subjectProfileValidationRows"></tbody>
+              </table>
+            </div>
+          </div><div class="panel span-12">
+            <div class="panel-head">
+              <h3>Curriculum Evidence Validation</h3>
+              <small>Curriculum experts validate the source, extraction, module evidence, and learning outcomes before the evidence can support labelled alignment research.</small>
+              <button class="btn" id="refreshCurriculumEvidenceReviewsBtn">Refresh Queue</button>
+            </div>
+            <div id="curriculumEvidenceReviewSummary" class="empty">Loading curriculum evidence review queue...</div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Document</th><th>Version</th><th>Extracted Evidence</th><th>Review Status</th><th>Reviewer</th><th>Action</th></tr></thead>
+                <tbody id="curriculumEvidenceReviewRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head">
+              <h3>Skill Mapping &amp; Taxonomy Review</h3>
+              <small>Generate evidence mappings, auto-approve high-confidence matches, and send uncertain matches to human review.</small>
+              <div class="actions">
+                <button class="btn" id="refreshSkillMappingWorkbenchBtn">Refresh Workbench</button>
+                <button class="btn primary" id="generateSkillMappingsBtn">Generate Evidence Mappings</button>
+              </div>
+            </div>
+            <div id="skillMappingWorkbenchSummary" class="empty">Loading mapping and taxonomy coverage...</div>
+            <div class="actions" aria-label="Mapping review queue controls">
+              <label for="skillMappingQueueStatus">Show</label>
+              <select id="skillMappingQueueStatus">
+                <option value="candidate">Candidates for first review</option>
+                <option value="needs_review">Needs second review</option>
+                <option value="rejected">Rejected mappings</option>
+              </select>
+              <label for="skillMappingLookupId">Mapping ID</label>
+              <input id="skillMappingLookupId" type="text" placeholder="UUID for corrective review" style="width:260px">
+              <button class="btn" id="skillMappingLookupBtn" type="button">Find mapping</button>
+              <button class="btn" id="archiveUnsupportedSkillsBtn" type="button">Archive unsupported inferred skills</button>
+              <button class="btn" id="skillMappingQueuePrev" type="button">Previous</button>
+              <span id="skillMappingQueuePage" aria-live="polite"></span>
+              <button class="btn" id="skillMappingQueueNext" type="button">Next</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Matched Evidence</th><th>Canonical / Taxonomy Skill</th><th>Source</th><th>Confidence</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="skillMappingReviewRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head">
+              <h3>DHET OFO 2021 Acquisition (Controlled Source)</h3>
+              <small>Official DHET Skills Development download (<code>https://www.dhet.gov.za/SitePages/SkillsDevelopmentNew.aspx</code>) with explicit operator confirmation, a manual upload fallback that records identical provenance, workbook validation, versioned import, and evidence-based OFO mapping. OFO codes are never fabricated and title-only evidence can never be approved.</small>
+              <div class="actions">
+                <button class="btn" id="refreshDhetOfoBtn">Refresh Source</button>
+                <button class="btn" id="discoverDhetOfoBtn">Run Discovery</button>
+                <button class="btn" id="uploadDhetOfoBtn">Upload Manual Fallback</button>
+                <input type="file" id="dhetOfoFileInput" accept=".xlsx,.xls,.csv" style="display:none">
+              </div>
+              <div class="check-row" style="margin:10px 0 8px"><label><input id="dhetOfoConfirmCheck" type="checkbox"> I confirm this resolves to the official DHET OFO 2021 workbook and authorise a single allowlist-domain download</label></div>
+              <button class="btn primary" id="downloadDhetOfoBtn" disabled>Confirm &amp; Controlled Download</button>
+            </div>
+            <div id="dhetOfoSourcePanel" class="empty">Loading DHET OFO source...</div>
+            <div class="table-wrap" style="margin-top:12px">
+              <h4>Acquisition provenance history</h4>
+              <table>
+                <thead><tr><th>Method</th><th>Retrieved</th><th>HTTP</th><th>Size</th><th>SHA-256</th><th>Version</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="dhetOfoAcquisitionRows"></tbody>
+              </table>
+            </div>
+            <div class="table-wrap" style="margin-top:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <h4 style="margin:0">Auditable OFO reference-table breakdown</h4>
+                <button class="btn" id="refreshDhetOfoBreakdownBtn">Refresh Breakdown</button>
+              </div>
+              <small>Every row in the <code>ofo_occupation</code> reference table is counted live by code length and by the acquisition that last wrote it. The code-length buckets and the acquisition buckets each sum exactly to the displayed total, so the portal count is always provable and never a bare assertion.</small>
+              <div id="dhetOfoBreakdownSummary" class="empty" style="margin-top:8px">Loading OFO breakdown...</div>
+              <table style="margin-top:8px">
+                <thead><tr><th>OFO level</th><th>Code length</th><th>Rows</th></tr></thead>
+                <tbody id="dhetOfoBreakdownLengthRows"></tbody>
+              </table>
+              <table style="margin-top:8px">
+                <thead><tr><th>Acquisition</th><th>Type</th><th>Method</th><th>Version(s)</th><th>Rows now</th><th>6-digit at import</th><th>Lineage note</th></tr></thead>
+                <tbody id="dhetOfoBreakdownAcqRows"></tbody>
+              </table>
+            </div>
+            <h4 style="margin-top:14px">Evidence-based OFO mapping (no title-only / fabricated codes)</h4>
+            <div id="dhetOfoMappingSummary" class="empty"></div>
+            <div class="import-controls" style="margin:8px 0">
+              <label>Canonical skill<select id="dhetOfoCanonicalSkill"><option value="">Select canonical skill</option></select></label>
+              <label>Evidence text (advert / matched excerpt)<textarea id="dhetOfoEvidenceTitle" rows="2" placeholder="Paste the advert or matched evidence text here; title-only text is deferred, never approved"></textarea></label>
+              <label>Duties<textarea id="dhetOfoEvidenceDuties" rows="2"></textarea></label>
+              <label>Education requirements<textarea id="dhetOfoEvidenceEducation" rows="2"></textarea></label>
+              <label>Experience requirements<textarea id="dhetOfoEvidenceExperience" rows="2"></textarea></label>
+              <label>Skills<textarea id="dhetOfoEvidenceSkills" rows="2"></textarea></label>
+              <div class="actions">
+                <button class="btn" id="proposeDhetOfoMappingBtn">Propose OFO Evidence Mapping</button>
+                <button class="btn" id="refreshDhetOfoMappingsBtn">Refresh OFO Mappings</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Evidence</th><th>OFO mapping</th><th>Method @ confidence</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="dhetOfoMappingRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head">
+              <h3>Taxonomy Provenance &amp; Decision Audit</h3>
+              <small>Official ESCO and DHET OFO source provenance, imported taxonomy coverage, file checksums, and append-only mapping decisions for reproducible validation and exports.</small>
+              <div class="actions">
+                <button class="btn" id="refreshTaxonomyProvenanceBtn">Refresh Provenance</button>
+              </div>
+            </div>
+            <div id="taxonomyProvenancePanel" class="empty">Loading taxonomy provenance...</div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head">
+              <h3>Independent Alignment Labelling</h3>
+              <small>Operated in <code>technical_uat_researcher_operated</code> mode: researcher-operated UAT analyst accounts (<code>uat_analyst_01</code>/<code>uat_analyst_02</code>) label consolidated subject/module skill profiles, not raw document chunks; disagreements route to adjudication. This is experimental technical-UAT evidence — NOT independent expert labels; an <code>independent_expert_validation</code> mode is reserved for future expert operation.</small>
+              <div class="actions">
+                <button class="btn" id="refreshAlignmentLabelQueueBtn">Refresh Label Queue</button>
+                <label style="margin:0 4px 0 12px">Task granularity
+                  <select id="alignmentTaskGranularity">
+                    <option value="evidence_chunk_skill">Evidence chunk x labour skill (scale)</option>
+                    <option value="subject_module_skill" selected>Module/outcome × labour skill</option>
+                    <option value="subject_module_group">Module/outcome groups</option>
+                    <option value="subject">Subject profiles</option>
+                  </select>
+                </label>
+                <button class="btn primary" id="generateAlignmentTasksBtn">Generate Review Tasks</button>
+                <label style="margin:0 4px 0 12px">Sample size
+                  <input type="number" id="alignmentSampleSize" value="12" min="2" max="500" style="width:64px">
+                </label>
+                <label>Seed
+                  <input type="text" id="alignmentSampleSeed" value="uat-researcher-sample-2026-09-12" style="width:150px">
+                </label>
+                <button class="btn primary" id="buildAlignmentSampleBtn">Build &amp; Assign UAT Sample</button>
+                <button class="btn" id="lockAlignmentLabelSnapshotBtn">Lock Reviewed Dataset</button>
+                <button class="btn" id="exportAlignmentLabelSnapshotBtn">Export Snapshot CSV</button>
+              </div>
+            </div>
+            <div id="alignmentLabelQualitySummary" class="empty">Loading independent-label quality...</div>
+            <div id="alignmentLabelSnapshotSummary" class="empty" style="margin-top:10px">No locked reviewed-label dataset loaded.</div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Programme / Evidence</th><th>Stage</th><th>Existing Independent Labels</th><th>Labour Window</th><th>Action</th></tr></thead>
+                <tbody id="alignmentLabelTaskRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head">
+              <h3>Rule-assisted Label Expansion</h3>
+              <small>Transparent lexical-rule proposals from existing evidence. A signed-in user must explicitly confirm selected rows. These rows remain separate from paired reviews and retain rule version, rationale, matched terms, confirming user and fingerprints.</small>
+              <div class="actions">
+                <label>Target rows <input type="number" id="assistedLabelTarget" value="500" min="1" max="2500" style="width:80px"></label>
+                <label>Per-class cap <input type="number" id="assistedLabelClassCap" value="500" min="1" max="1000" style="width:80px"></label>
+                <button class="btn primary" id="previewAssistedLabelsBtn">Preview Proposals</button>
+                <button class="btn" id="selectAllAssistedLabelsBtn">Select Displayed</button>
+                <button class="btn primary" id="confirmAssistedLabelsBtn" disabled>Confirm Selected</button>
+                <button class="btn" id="lockAssistedSnapshotBtn">Lock Assisted Snapshot</button>
+              </div>
+            </div>
+            <div id="assistedLabelSummary" class="empty">Preview proposals before confirming any labels.</div>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Select</th><th>Evidence unit</th><th>Target skill</th><th>Proposal</th><th>Rule and evidence</th></tr></thead>
+              <tbody id="assistedLabelRows"><tr><td colspan="5">No proposals loaded.</td></tr></tbody>
+            </table></div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head">
+              <h3>StatsSA Pipeline Orchestrator</h3>
+              <small>StatsSA ingestion to reports, recorded stage by stage</small>
+            </div>
+            <div class="actions" style="margin-bottom:12px">
+              <button class="btn primary" id="runPipelineBtn">Run StatsSA Pipeline</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Run</th><th>Status</th><th>Triggered By</th><th>Started</th><th>Stages</th><th>Summary</th></tr></thead>
+                <tbody id="pipelineRunRows"></tbody>
+              </table>
+            </div>
+           </div>
+          <div class="panel span-12">
+            <div class="panel-head"><h3>Pipeline Stage Monitor</h3><small id="pipelineStageCaption">Select a run to inspect stages</small></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Stage</th><th>Status</th><th>Duration</th><th>Loaded</th><th>Rejected</th><th>Error</th></tr></thead>
+                <tbody id="pipelineStageRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel span-12">
+            <div class="panel-head"><h3>Validated Decision Output Regeneration</h3><small id="processingCaption">Generate alignment, gaps, forecasts, and recommendations only from expert-validated and approved evidence</small></div>
+            <div id="validatedRegenerationReadiness" class="empty" style="text-align:left;margin-bottom:12px">Checking validated-evidence readiness...</div>
+            <div class="actions" style="margin-bottom:12px">
+              <button class="btn primary" id="runFullProcessingBtn">Regenerate Validated Outputs</button>
+              <button class="btn" id="runProcessingBtn">Check Processing Readiness</button>
+              <button class="btn" id="rerunAlignmentBtn">Regenerate Coherent Output Bundle</button>
+              <button class="btn" id="rerunForecastsBtn">Regenerate with 4-Period Forecast</button>
+              <button class="btn" id="rerunRecommendationsBtn">Regenerate Coherent Output Bundle</button>
+              <button class="btn" id="refreshProcessingBtn">Refresh Analysis Status</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Readiness</th><th>Data Ready</th><th>Warnings</th><th>Next Step</th></tr></thead>
+                <tbody id="processingRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head">
+              <h3>Durable Operational Jobs</h3>
+              <small>Processing continues on the server if this page is closed. Failed jobs can be retried here.</small>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Job</th><th>Status</th><th>Progress</th><th>Attempt</th><th>Requested By</th><th>Started / Completed</th><th>Action</th></tr></thead>
+                <tbody id="operationalJobRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-12" style="background:#f8fafc;border-style:dashed;">
+            <div class="panel-head"><h3>Advanced Source Admin</h3><small>Technical governance controls. Most curriculum administrators can leave this section alone unless they are checking failures, schedules, or source-format changes.</small></div>
+          </div>
+          <div class="panel span-6">
+            <div class="panel-head">
+              <h3>Source Type Catalog</h3>
+              <small>Advanced: source adapter definitions</small>
+              <button class="btn" id="addConnectorBtn">Add Source Type</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Source Type</th><th>Family</th><th>Mode</th><th>Format</th><th>Action</th></tr></thead>
+                <tbody id="connectorCatalogRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-6">
+            <div class="panel-head"><h3>Normalisation Rules</h3><small>Active versioned rules used by processing</small></div>
+            <div class="decision-limitation"><strong>Current capability:</strong> This registry is read-only in the portal. Analysts can verify which rule and version will be used. Adding or changing a rule requires a tested, versioned backend release because transformations can alter every downstream result.</div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Normaliser</th><th>Input</th><th>Output</th><th>Purpose</th><th>Status</th></tr></thead>
+                <tbody id="normaliserRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-7">
+            <div class="panel-head"><h3>Import / Normalise Job History</h3><small>Detailed audit trail for uploads, imports, validation, and cleaning</small></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Job</th><th>Status</th><th>Progress</th><th>Attempt</th><th>Raw</th><th>Cleaned</th><th>Checks</th><th>Quality</th><th>Action</th></tr></thead>
+                <tbody id="qualityJobRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-5">
+            <div class="panel-head">
+              <h3>Data Sources</h3>
+              <small>Advanced: authorisation, health, and schedules</small>
+              <button class="btn" id="addSourceBtn">Add Data Source</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Source</th><th>Status</th><th>Policy</th><th>Action</th></tr></thead>
+                <tbody id="sourceConnectorRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head"><h3>Source Admin</h3><small id="connectorOpsCaption">Advanced: manage schedules, retries, credentials, files, and health history</small></div>
+            <div class="actions" style="margin-bottom:12px">
+              <button class="btn" id="loadReadinessBtn">Source Readiness</button>
+              <button class="btn" id="loadFreshnessBtn">Refresh Status</button>
+              <button class="btn" id="loadDueSchedulesBtn">Scheduled Imports Due</button>
+              <button class="btn" id="simulateJobBoardBtn">Test Job API</button>
+            </div>
+            <div id="connectorOpsPanel" class="empty">Select a data source row to view health, schedules, credentials, files, or retry options.</div>
+          </div>
+
+          <div class="panel span-12">
+            <div class="panel-head"><h3>Import Problems and Retry Queue</h3><small>Shows failed imports, retry scheduling, and diagnostics</small></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Failure</th><th>Stage</th><th>Category</th><th>Retry</th><th>Message</th></tr></thead>
+                <tbody id="failureRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-5">
+            <div class="panel-head"><h3>Source Validation Rules</h3><small>Advanced: expected fields and allowed source formats</small></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Rule</th><th>Record Type</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="qualityContractRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-7">
+            <div class="panel-head"><h3>Source Format Changes</h3><small id="contractOpsCaption">Advanced: check whether a source format has changed from the expected rules</small></div>
+            <div id="contractOpsPanel" class="empty">Select Check Format or Edit from a validation rule row.</div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head"><h3>Recent Validation Checks</h3><small id="qualityCheckCaption">Latest selected job</small></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Status</th><th>Severity</th><th>Message</th><th>Rule</th></tr></thead>
+                <tbody id="qualityCheckRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head"><h3>Rejected and Noisy Row Review</h3><small>Failed, skipped, noisy, pending, and low-confidence records</small></div>
+            <div class="actions" style="margin-bottom:12px">
+              <label><small>Category</small><select id="reviewSourceCategory"><option value="">All</option><option value="curriculum">Curriculum</option><option value="labour_market_trends">Job trends</option><option value="current_jobs">Current jobs</option><option value="higher_education_context">Higher education context</option></select></label>
+              <label><small>Status</small><select id="reviewStatusFilter"><option value="">Problem statuses</option><option value="failed">Failed</option><option value="warning">Warning</option><option value="invalid">Invalid</option><option value="skipped">Skipped</option><option value="noise">Noise</option><option value="unmatched">Unmatched</option><option value="pending">Pending</option></select></label>
+              <label><small>Record type</small><input id="reviewRecordType" placeholder="e.g. job_posting" /></label>
+              <label><input type="checkbox" id="reviewLowConfidence" /> Low confidence only</label>
+              <button class="btn" id="loadReviewRowsBtn">Load Review Queue</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Record</th><th>Type</th><th>Status</th><th>Payload</th><th>Action</th></tr></thead>
+                <tbody id="reviewRecordRows"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="systemOperations" class="view">
+        <div class="panel">
+          <div class="panel-head"><h3>System Operations</h3><small>ADMIN workspace for service health, security readiness, backups, deployment, and UAT checks.</small></div>
+          <div class="empty" style="text-align:left">System controls are intentionally separate from viewer dashboards and data ingestion. Use this page to load security readiness, generate backup manifests, and inspect deployment/UAT readiness. The dedicated system-operations wiring will be expanded as the backend lifecycle endpoints are hardened.</div>
+        </div>
+        <div class="grid">
+          <div class="panel span-12">
+            <div class="panel-head"><h3>System Readiness Checklist</h3><small>Operational areas that must be clean before UAT/prod deployment</small></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Area</th><th>Purpose</th><th>Where controlled today</th></tr></thead>
+                <tbody>
+                  <tr><td>Security readiness</td><td>RBAC, bootstrap disablement, tenant controls, credentials and audit posture.</td><td>Data Operations readiness panel</td></tr>
+                  <tr><td>Backup manifest</td><td>Confirms backup metadata and operational recovery evidence.</td><td>Data Operations readiness panel</td></tr>
+                  <tr><td>Deployment/UAT readiness</td><td>Confirms nginx, containers/scripts, environment warnings and UAT packaging.</td><td>Data Operations readiness panel</td></tr>
+                  <tr><td>Service health</td><td>Backend, database, pgvector, frontend, and scheduled operations status.</td><td>Executive Pipeline Health plus backend health endpoint</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="governance" class="view">
+        <div class="metrics">
+          <div class="metric"><span>Reviews</span><strong id="governanceReviews">0</strong><small>Human decisions</small></div>
+          <div class="metric"><span>Feedback Items</span><strong id="governanceFeedback">0</strong><small>Reviewer comments</small></div>
+          <div class="metric"><span>Status Changes</span><strong id="governanceHistory">0</strong><small>Recommendation transitions</small></div>
+            <div class="metric"><span>Vector Backend</span><strong id="governanceVector">-</strong><small>Search readiness</small></div>
+            <div class="metric"><span>Active Embedding</span><strong id="governanceActiveEmbedding">-</strong><small>Embedding method</small></div>
+            <div class="metric"><span>Sentence Embedder</span><strong id="governanceSentenceEmbedder">-</strong><small>Model availability</small></div>
+          </div>
+        <div class="grid">
+          <div class="panel span-6">
+            <div class="panel-head"><h3>Review Status</h3><small>Recommendation lifecycle</small></div>
+            <div id="statusBars" class="bar-list"></div>
+          </div>
+          <div class="panel span-6">
+            <div class="panel-head"><h3>Recent Governance Events</h3><small>Review and feedback trail</small></div>
+            <div class="search-bar"><input id="governanceSearch" placeholder="Filter by type or status..."></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Type</th><th>Status</th><th>Reason</th></tr></thead>
+                <tbody id="governanceRows"></tbody>
+              </table>
+            </div>
+            <div id="governancePagination" class="pagination"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="reports" class="view">
+        <div class="panel">
+          <div class="panel-head"><h3>Exportable Reports</h3><small>Generated from current dashboard data</small></div>
+          <div class="report-list">
+            <div class="report-row">
+              <div><strong>Executive Summary</strong><span>Core KPIs, recommendations, forecasts, and governance counts.</span></div>
+              <div class="actions"><button class="btn" data-export="executive-json">JSON</button><button class="btn" data-export="executive-csv">CSV</button><button class="btn" data-export="executive-pdf">PDF</button></div>
+            </div>
+            <div class="report-row">
+              <div><strong>Curriculum Alignment Report</strong><span>Documents, versions, chunks, and latest alignment scores.</span></div>
+              <div class="actions"><button class="btn" data-export="curriculum-json">JSON</button><button class="btn" data-export="curriculum-csv">CSV</button><button class="btn" data-export="curriculum-pdf">PDF</button></div>
+            </div>
+            <div class="report-row">
+              <div><strong>Skill Gap Report</strong><span>Skill catalogue, mappings, and gap evidence.</span></div>
+              <div class="actions"><button class="btn" data-export="skills-json">JSON</button><button class="btn" data-export="skills-csv">CSV</button><button class="btn" data-export="skills-pdf">PDF</button></div>
+            </div>
+            <div class="report-row">
+              <div><strong>Governance Audit Report</strong><span>Recommendation reviews, feedback, and status history.</span></div>
+              <div class="actions"><button class="btn" data-export="governance-json">JSON</button><button class="btn" data-export="governance-csv">CSV</button><button class="btn" data-export="governance-pdf">PDF</button></div>
+            </div>
+            <div class="report-row">
+              <div><strong>Ingestion Quality Report</strong><span>Contracts, quality summaries, and cleaned-record readiness.</span></div>
+              <div class="actions"><button class="btn" data-export="ingestion-json">JSON</button><button class="btn" data-export="ingestion-csv">CSV</button><button class="btn" data-export="ingestion-pdf">PDF</button></div>
+            </div>
+          </div>
+          <div class="panel-head" style="margin-top:18px"><h3>Report Archive</h3><small>Persisted generated reports</small></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Report</th><th>Type</th><th>Generated By</th><th>Created</th></tr></thead>
+              <tbody id="generatedReportRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  
+  <script type="module">
+    import { initPage } from './shared-nav.js';
+    import { auth } from './auth.js';
+    import { API_ENDPOINTS } from './config.js';
+
+    const token = auth.getToken();
+    if (!token) {
+      window.location.replace('index.html');
+    } else {
+      const response = await auth.fetch(API_ENDPOINTS.AUTH.ME);
+      if (!response.ok) {
+        auth.handleUnauthorized();
+      } else {
+        const user = await response.json();
+        const roles = (user.roles || []).map(r => String(r).toLowerCase().replaceAll(' ', '_'));
+        if (user.is_admin && !roles.includes('admin')) roles.push('admin');
+        const authorised = roles.some(role => ['admin', 'administrator', 'analyst', 'data_analyst', 'data_scientist'].includes(role));
+        if (!authorised) {
+          document.querySelector('.app')?.remove();
+          window.location.replace('dashboard.html?view=executive&access_denied=data_operations');
+        } else {
+          document.querySelector('.app')?.style.setProperty('visibility', 'visible');
+          initPage('dataOperations');
+        }
+      }
+    }
+  </script>
+  <script>window.FUTURE_DEFAULT_VIEW = "dataOperations";</script>
+  <div id="subjectProfileValidationModal" class="modal-overlay hidden">
+    <div class="modal-box subject-profile-modal">
+      <h3>Validate Subject Profile</h3>
+      <p id="subjectProfileValidationTitle">Confirm the derived subject profile.</p>
+      <div class="decision-limitation" style="margin:10px 0;text-align:left">
+        <strong>Important:</strong> this edits the structured subject profile used for reporting and recommendations. The original uploaded file and extracted chunks are preserved as evidence. Every profile change is recorded in the audit trail.
+      </div>
+      <input type="hidden" id="subjectProfileId">
+      <div class="import-controls">
+        <label>Institution<input id="subjectProfileInstitution" placeholder="CPUT"></label>
+        <label>Faculty<input id="subjectProfileFaculty" placeholder="Faculty name"></label>
+        <label>Department<input id="subjectProfileDepartment" placeholder="Department name"></label>
+        <label>Programme / qualification name<input id="subjectProfileProgrammeName" placeholder="e.g. Postgraduate Diploma in ICT"></label>
+      </div>
+      <div class="import-controls">
+        <label>Programme / qualification code<input id="subjectProfileProgrammeCode" placeholder="e.g. PGDICT / ADICTA"></label>
+        <label>Qualification type<input id="subjectProfileQualificationType" placeholder="Diploma / Advanced Diploma / PGDip"></label>
+        <label>Subject code<input id="subjectProfileSubjectCode" placeholder="e.g. ITS362S"></label>
+        <label>Subject name<input id="subjectProfileSubjectName" placeholder="e.g. Information Systems 3"></label>
+      </div>
+      <div class="import-controls">
+        <label>Evidence year<input id="subjectProfileYear" type="number" min="1900" max="2100" placeholder="2025"></label>
+        <label>NQF level<input id="subjectProfileNqf" type="number" min="1" max="10" placeholder="6"></label>
+        <label>Credits<input id="subjectProfileCredits" type="number" min="0" max="1000" placeholder="12"></label>
+        <label>Validation status<select id="subjectProfileStatus"><option value="needs_review">Needs review</option><option value="validated">Validated</option><option value="changes_required">Changes required</option><option value="rejected">Rejected</option></select></label>
+      </div>
+      <div class="profile-text-grid">
+        <label>Purpose<textarea id="subjectProfilePurpose" rows="5" placeholder="What this subject/module is intended to achieve."></textarea></label>
+        <label>Articulation / prerequisites<textarea id="subjectProfileArticulation" rows="4" placeholder="Prerequisites, articulation, or learning presumed to be in place."></textarea></label>
+        <label>Validation notes<textarea id="subjectProfileNotes" rows="4" placeholder="Briefly state what was confirmed or corrected."></textarea></label>
+      </div>
+      <div id="subjectProfileValidationModalStatus" class="inline-status" style="margin-top:10px"></div>
+      <div class="modal-actions">
+        <button class="btn" id="closeSubjectProfileValidationBtn">Cancel</button>
+        <button class="btn primary" id="submitSubjectProfileValidationBtn">Save Profile Review</button>
+      </div>
+    </div>
+  </div>
+  <div id="curriculumEvidenceReviewModal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:760px">
+      <h3>Validate Curriculum Evidence</h3>
+      <p id="curriculumEvidenceReviewDocument">Select a curriculum document version.</p>
+      <div class="decision-limitation" style="margin:10px 0;text-align:left">
+        <strong>Before saving:</strong> inspect the extracted evidence below. Only mark the evidence as validated when the visible chunks are readable, from the correct source/version, and complete enough to support alignment labelling. If modules, outcomes, pages, or text are missing or wrong, choose <strong>Changes required</strong> and explain what must be fixed.
+      </div>
+      <div id="curriculumEvidenceChunkPreview" class="empty" style="max-height:280px;overflow:auto;text-align:left;margin-bottom:12px">Loading extracted evidence chunks...</div>
+      <input type="hidden" id="curriculumEvidenceReviewVersionId">
+      <div class="import-controls">
+        <label>Decision<select id="curriculumEvidenceReviewDecision"><option value="changes_required">Changes required</option><option value="validated">Validated</option><option value="rejected">Rejected</option></select></label>
+        <label>Completeness score (0&ndash;100)<input id="curriculumEvidenceReviewScore" type="number" min="0" max="100" value="0"></label>
+      </div>
+      <div class="check-row"><label><input id="curriculumEvidenceSourceAuthoritative" type="checkbox"> Source is authoritative and the correct curriculum version</label></div>
+      <div class="check-row"><label><input id="curriculumEvidenceExtractionComplete" type="checkbox"> Extraction accurately represents the source document</label></div>
+      <div class="check-row"><label><input id="curriculumEvidenceModulesComplete" type="checkbox"> Module names, codes and descriptions are sufficiently complete</label></div>
+      <div class="check-row"><label><input id="curriculumEvidenceOutcomesComplete" type="checkbox"> Learning outcomes or equivalent evidence are sufficiently complete</label></div>
+      <div id="curriculumEvidenceScoreHelp" class="muted" style="margin:8px 0 12px">Completeness is calculated from the four checks: each selected check adds 25%.</div>
+      <label>Issue codes (comma separated)<input id="curriculumEvidenceIssueCodes" placeholder="missing_learning_outcomes, incorrect_module_code"></label>
+      <label>Expert notes<textarea id="curriculumEvidenceReviewNotes" rows="5" placeholder="Briefly state why this evidence is acceptable or what must be corrected. If everything is acceptable, use wording such as: Evidence reviewed and accepted; source, extraction, modules and outcomes are adequate for labelling."></textarea></label>
+      <div id="curriculumEvidenceReviewModalStatus" class="inline-status" style="margin-top:10px"></div>
+      <div class="modal-actions">
+        <button class="btn" id="closeCurriculumEvidenceReviewBtn">Cancel</button>
+        <button class="btn primary" id="submitCurriculumEvidenceReviewBtn">Save Expert Review</button>
+      </div>
+    </div>
+  </div>
+  <div id="skillMappingReviewModal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:700px">
+      <h3>Review Skill Mapping</h3>
+      <p id="skillMappingReviewEvidence">Select a mapping.</p>
+      <input type="hidden" id="skillMappingReviewId">
+      <label>Decision<select id="skillMappingReviewDecision"><option value="approved">Approve mapping</option><option value="rejected">Reject mapping</option><option value="deferred">Defer mapping</option><option value="disagreement">Disagree (flag for re-review)</option><option value="resolved">Resolve disagreement</option><option value="needs_review">Needs further review</option></select></label>
+      <label>Review note<textarea id="skillMappingReviewNote" rows="5" placeholder="Explain why this evidence does or does not map to the selected skill."></textarea></label>
+      <div id="skillMappingReviewHistoryHolder" style="max-height:200px;overflow:auto;border:1px solid var(--border,#ddd);padding:8px;border-radius:6px;margin-top:8px"><strong>Decision history</strong><div id="skillMappingReviewHistory">Loading...</div></div>
+      <div class="modal-actions">
+        <button class="btn" id="closeSkillMappingReviewBtn">Cancel</button>
+        <button class="btn primary" id="submitSkillMappingReviewBtn">Save Mapping Review</button>
+      </div>
+    </div>
+  </div>
+  <div id="dhetOfoReviewModal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:700px">
+      <h3>Review OFO Evidence Mapping</h3>
+      <p id="dhetOfoReviewEvidence">Select a mapping.</p>
+      <input type="hidden" id="dhetOfoReviewId">
+      <label>Decision<select id="dhetOfoReviewDecision"><option value="approved">Approve mapping</option><option value="rejected">Reject mapping</option><option value="deferred">Defer mapping</option><option value="disagreement">Disagree (flag for re-review)</option><option value="resolved">Resolve disagreement</option><option value="needs_review">Needs further review</option></select></label>
+      <label>OFO code (required for approve)<input id="dhetOfoReviewCode" placeholder="Six-digit OFO code that must already exist in the imported DHET workbook"></label>
+      <label>Review note<textarea id="dhetOfoReviewNote" rows="5" placeholder="Explain why this evidence does or does not map to the selected six-digit OFO occupation."></textarea></label>
+      <div id="dhetOfoReviewHistoryHolder" style="max-height:200px;overflow:auto;border:1px solid var(--border,#ddd);padding:8px;border-radius:6px;margin-top:8px"><strong>Decision history</strong><div id="dhetOfoReviewHistory">Loading...</div></div>
+      <div class="modal-actions">
+        <button class="btn" id="closeDhetOfoReviewBtn">Cancel</button>
+        <button class="btn primary" id="submitDhetOfoReviewBtn">Save OFO Review</button>
+      </div>
+    </div>
+  </div>
+  <div id="alignmentLabelModal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:850px">
+      <h3>Independent Alignment Review</h3>
+      <input type="hidden" id="alignmentLabelTaskId">
+      <p id="alignmentLabelStage"></p>
+      <div class="grid">
+        <div class="span-6"><strong>Curriculum evidence</strong><div id="alignmentCurriculumEvidence" class="empty" style="max-height:240px;overflow:auto;text-align:left"></div></div>
+        <div class="span-6"><strong>Labour-market evidence window</strong><div id="alignmentLabourEvidence" class="empty" style="max-height:240px;overflow:auto;text-align:left"></div></div>
+      </div>
+      <div class="import-controls">
+        <label>Alignment label (1&ndash;5)<select id="alignmentLabelValue"><option value="1">1 &mdash; No alignment</option><option value="2">2 &mdash; Weak</option><option value="3">3 &mdash; Moderate</option><option value="4">4 &mdash; Strong</option><option value="5">5 &mdash; Very strong</option></select></label>
+        <label>Reviewer confidence (1&ndash;5)<select id="alignmentLabelConfidence"><option value="1">1 &mdash; Very low</option><option value="2">2 &mdash; Low</option><option value="3">3 &mdash; Moderate</option><option value="4">4 &mdash; High</option><option value="5">5 &mdash; Very high</option></select></label>
+      </div>
+      <label>Skills present<input id="alignmentPresentSkills" placeholder="Comma-separated skills supported by the curriculum evidence"></label>
+      <label>Skills missing<input id="alignmentMissingSkills" placeholder="Comma-separated labour-market skills missing from the curriculum"></label>
+      <label>Independent justification<textarea id="alignmentLabelJustification" rows="5" placeholder="Explain your rating using only the evidence shown. Do not use or infer a generated model score."></textarea></label>
+      <div class="modal-actions">
+        <button class="btn" id="closeAlignmentLabelBtn">Cancel</button>
+        <button class="btn primary" id="submitAlignmentLabelBtn">Save Independent Label</button>
+      </div>
+    </div>
+  </div>
+<link rel="stylesheet" href="data-operations-navigation.css?v=20260909d">
+  <script src="data-operations-navigation.js?v=20260920-assisted1"></script>
+<script type="module" src="dashboard-main.js?v=20260921-assisted2"></script>
+  <script type="module" src="adzuna-intake.js?v=20260909c"></script>
+  <script type="module" src="adzuna-skill-pipeline.js?v=20260912d"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

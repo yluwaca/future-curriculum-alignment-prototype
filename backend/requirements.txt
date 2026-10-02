@@ -1,0 +1,60 @@
+# backend/requirements.txt
+# Audit: 2026-07-18 - only packages actually imported in app/ + their direct deps
+
+# Core Framework
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-dotenv>=1.0.0
+pydantic[email]>=2.5.0
+pydantic-settings>=2.1.0
+python-multipart>=0.0.6
+slowapi>=0.1.10
+
+# Database
+sqlalchemy>=2.0.25
+alembic>=1.13.1
+psycopg2-binary>=2.9.9
+asyncpg>=0.29.0
+pgvector>=0.4.2  # Python adapter; PostgreSQL server must also provide CREATE EXTENSION vector
+
+# Authentication & Security
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+bcrypt<4.1
+cryptography>=41.0.7
+
+# HTTP & Utilities
+httpx>=0.26.0
+requests>=2.31.0
+psutil>=5.9.0
+
+# Data Processing
+pandas>=2.1.4
+openpyxl>=3.1.2
+numpy>=1.26.2
+scipy>=1.11.0
+pdfplumber>=0.10.3
+joblib>=1.3.2
+
+# NLP & ML - Sentence Embeddings (PyTorch-based)
+torch>=2.1.0
+sentence-transformers>=3.0.0
+transformers>=4.30.0
+
+# NLP & ML - Classical
+scikit-learn>=1.3.2
+xgboost>=2.0.3
+spacy>=3.7.2
+
+# NLP & ML - Deep Learning
+tensorflow>=2.15.0
+
+# NLP & ML - Explainability
+shap>=0.44.1
+
+# Logging & Monitoring
+structlog>=23.2.0
+
+# Testing (dev only)
+pytest>=7.4.3
+pytest-asyncio>=0.23.2

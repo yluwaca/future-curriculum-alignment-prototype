@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FUTURE Platform &ndash; Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="auth.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css?v=20260824a">
+</head>
+<body>
+  <main class="page">
+    <section class="brand-panel" aria-labelledby="platform-title">
+      <div class="brand-header">
+        <div class="logo"><div class="logo-icon" aria-hidden="true">F</div><span class="logo-text">FUTURE</span></div>
+        <h1 id="platform-title">Curriculum&ndash;Labour Market<br>Alignment Platform</h1>
+        <p>A governed workspace for comparing curriculum evidence with labour-market evidence and supporting higher-education planning.</p>
+      </div>
+      <div class="brand-footer">
+        <div class="feature"><div class="feature-icon" aria-hidden="true">&#9670;</div><div class="feature-text"><strong>Evidence workspace</strong> &mdash; curriculum and labour-market evidence with traceable sources</div></div>
+        <div class="feature"><div class="feature-icon" aria-hidden="true">&#9670;</div><div class="feature-text"><strong>Decision support</strong> &mdash; alignment analysis, forecasts, and governed recommendations</div></div>
+        <div class="feature"><div class="feature-icon" aria-hidden="true">&#9670;</div><div class="feature-text"><strong>Human governance</strong> &mdash; role-based access, audit history, and expert review workflows</div></div>
+      </div>
+    </section>
+
+    <section class="form-panel" aria-labelledby="sign-in-title">
+      <div class="form-container">
+        <div class="form-header">
+          <div class="mobile-logo"><div class="logo-icon" aria-hidden="true">F</div><span>FUTURE</span></div>
+          <h2 id="sign-in-title">Welcome back</h2>
+          <p>Sign in to continue to your authorised workspace.</p>
+        </div>
+        <div id="alertContainer" role="status" aria-live="polite"></div>
+        <form id="loginForm" novalidate>
+          <div class="form-group">
+            <label for="username">Username or email</label>
+            <input type="text" id="username" class="form-control" placeholder="Enter your username or email" required autocomplete="username" autofocus>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="password-field">
+              <input type="password" id="password" class="form-control" placeholder="Enter your password" required autocomplete="current-password">
+              <button type="button" id="togglePassword" class="password-toggle" aria-controls="password" aria-pressed="false">Show</button>
+            </div>
+            <small id="capsLockMessage" class="field-hint hidden" role="status">Caps Lock is on.</small>
+          </div>
+          <button type="submit" id="loginBtn" class="btn"><span id="loginBtnText">Sign In</span><span id="loginSpinner" class="loading hidden"></span></button>
+        </form>
+        <div class="form-footer">
+          <p>Need access? <a href="register.html" id="registerLink">Request an account</a></p>
+          <p class="help-link">New here? <a href="user-guide.html">Read the User Guide</a></p>
+        </div>
+        <p class="session-expired hidden" id="sessionExpiredMsg">Your session has expired. Please sign in again.</p>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="login.js"></script>
+</body>
+</html>

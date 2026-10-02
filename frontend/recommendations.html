@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>FUTURE Platform - Recommendations</title>
+  <link rel="stylesheet" href="recommendations.css?v=20260911b">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css?v=20260824a"></head>
+<body>
+<div class="app-container">
+
+  <!-- Sidebar -->
+  <aside class="sidebar"></aside>
+
+  <!-- Main -->
+  <main class="main-content">
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <div>
+        <h1 id="pageTitle">Recommendations</h1>
+        <p id="pageSubtitle">Inspect recommendation evidence, confidence, status, and decision history.</p>
+      </div>
+      <div class="topbar-actions">
+        <span id="userDisplay"></span>
+        <button class="btn sm" id="refreshBtn">Refresh</button>
+        <button class="btn sm" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+
+    <!-- Status bar -->
+    <div id="statusBar" class="status-bar"></div>
+    <div id="viewerReadOnlyNotice" class="decision-limitation" hidden>
+      <strong>Read-only access:</strong>
+      You may inspect recommendation evidence and history. Approval, rejection, modification, and committee-pack generation require an authorised review role.
+    </div>
+
+    <div class="card governance-card viewer-hidden">
+      <div>
+        <h3>Committee governance readiness</h3>
+        <p id="governanceSummary">Checking validated evidence and human review gatesâ€¦</p>
+        <div id="governanceChecks"></div>
+      </div>
+      <button class="btn primary" id="committeePackBtn" disabled>Generate committee evidence pack</button>
+    </div>
+
+    <div class="decision-limitation">
+      <strong>Decision-support limitation:</strong>
+      Recommendations indicate evidence that warrants human attention. They do not automatically establish curriculum relevance, feasibility, resource availability, accreditation impact, or a committee decision.
+    </div>
+
+    <!-- Split pane -->
+    <div class="split-pane">
+
+      <!-- Left: Recommendation List -->
+      <div class="pane-list">
+        <div class="card">
+          <div class="filter-bar">
+            <select id="statusFilter">
+              <option value="">All Statuses</option>
+              <option value="pending_review">Pending Review</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="modified_pending_review">Modified Pending</option>
+            </select>
+            <select id="priorityFilter">
+              <option value="">All Priorities</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+            <input id="searchFilter" placeholder="Search title..." />
+          </div>
+          <div id="recCount" style="font-size:12px;color:var(--text-muted);margin-bottom:8px;"></div>
+          <div id="recList" class="rec-list"></div>
+          <div id="recPagination" style="margin-top:8px;text-align:center;"></div>
+        </div>
+      </div>
+
+      <!-- Right: Dossier Detail -->
+      <div class="pane-detail">
+        <div class="card">
+          <div id="dossierContent">
+            <div class="dossier-empty">Select a recommendation to view its full dossier.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div id="reviewModal" class="modal-overlay">
+  <div class="modal modal-review">
+    <div class="modal-header"><h3 id="modalTitle">Review Recommendation</h3></div>
+    <form id="reviewForm">
+    <div class="modal-body">
+      <div id="reviewModalContext" class="review-modal-context" role="region" aria-label="Recommendation evidence context"></div>
+
+      <div id="reviewModalErrors" class="review-errors" role="alert" aria-live="assertive"></div>
+
+      <label for="modalReason">Reason</label>
+      <textarea id="modalReason" placeholder="Enter reason for this decision..." aria-describedby="reviewModalErrors reviewModalContext"></textarea>
+
+      <label for="modalFeedback">Feedback Comment</label>
+      <textarea id="modalFeedback" placeholder="Optional feedback..."></textarea>
+
+      <div id="modifyFields" style="display:none;">
+        <label for="modalTitleInput">Modified Title</label>
+        <input id="modalTitleInput" placeholder="New title..." />
+        <label for="modalDescription">Modified Description</label>
+        <textarea id="modalDescription" placeholder="New description..."></textarea>
+        <label for="modalPriority">Modified Priority</label>
+        <select id="modalPriority">
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+
+      <div id="reviewEvidenceCheckboxWrap" class="review-evidence-checkbox-wrap">
+        <label class="review-evidence-label">
+          <input id="evidenceReviewedCheckbox" type="checkbox" aria-required="true" aria-describedby="reviewModalErrors" />
+          <span>I reviewed the evidence for this recommendation</span>
+        </label>
+      </div>
+    </div>
+    <div class="review-modal-footer-error" id="reviewModalFooterError" role="alert" aria-live="assertive"></div>
+    <div class="modal-footer">
+      <button class="btn" id="modalCancel" type="button">Cancel</button>
+      <button class="btn primary" id="modalConfirm" type="submit" disabled aria-describedby="reviewModalFooterError">Confirm</button>
+    </div>
+    </form>
+  </div>
+</div>
+
+  <script type="module">
+    import { initPage } from './shared-nav.js';
+    initPage('recommendations');
+  </script>
+    <script type="module" src="recommendations.js?v=20261001a"></script>
+</body>
+</html>

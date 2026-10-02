@@ -1,0 +1,14 @@
+PCLMAS SYNTHETIC DEMONSTRATION FIXTURE — NOT EMPIRICAL EVIDENCE
+
+Programme: Synthetic Diploma in Applied ICT
+Module code: DEMO-ICT-101
+Version: 2026-DEMO-1
+Evidence date: 2026-01-15
+
+Learning outcomes
+The learner writes small Python programs, queries relational data with SQL, uses
+Git for version control, and explains basic Docker container concepts. The
+learner documents tests and reviews changes before a simulated release.
+
+This fictional module was written only to exercise the public prototype. It is
+not a CPUT curriculum record and must not be used in research evaluation.

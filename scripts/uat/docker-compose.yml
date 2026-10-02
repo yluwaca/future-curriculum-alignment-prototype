@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: future-postgres
+    environment:
+      POSTGRES_DB: future_uat
+      POSTGRES_USER: future_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be injected}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U future_user -d future_uat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - future-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: future-backend
+    expose:
+      - "8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql://future_user:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be injected}@postgres:5432/future_uat
+    volumes:
+      - ./backend/data:/app/data
+      - ./backend/logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    restart: unless-stopped
+    networks:
+      - future-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: future-nginx
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx/conf/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - future-net
+
+volumes:
+  postgres-data:
+
+networks:
+  future-net:
+    driver: bridge

@@ -1,0 +1,23 @@
+.ops-navigation { background: #fff; border: 1px solid #dbe3ef; border-radius: 14px; padding: 20px; margin-bottom: 20px; scroll-margin-top: 16px; }
+.ops-areas, .ops-steps { display: flex; flex-wrap: wrap; gap: 8px; }
+.ops-areas button, .ops-steps button { cursor: pointer; border: 1px solid #dbe3ef; background: #f7f9fc; color: #334b67; border-radius: 8px; padding: 10px 16px; font: inherit; }
+.ops-areas button { font-size: 15px; font-weight: 650; min-width: 125px; }
+.ops-areas button[aria-current=page] { color: #fff; background: #235bef; border-color: #235bef; }
+.ops-steps button[aria-current=step] { background: #eaf0ff; border-color: #235bef; color: #1743b4; }
+.ops-navigation button:focus-visible { outline: 3px solid #84a6ff; outline-offset: 3px; }
+.ops-description { color: #61728a; margin: 14px 0; }
+.ops-workspace { display: grid; gap: 18px; min-width: 0; }
+.ops-workspace > .panel, .ops-workspace > .import-box { margin: 0; padding: 24px; width: 100%; box-sizing: border-box; background: #fff; border: 1px solid #dbe3ef; border-radius: 12px; min-width: 0; }
+.ops-workspace [hidden], .ops-workspace > [hidden], .ops-legacy-container { display: none !important; }
+.ops-workspace .import-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin: 16px 0; }
+.ops-workspace .import-controls label { display: flex; flex-direction: column; gap: 7px; }
+.ops-workspace .import-controls input, .ops-workspace .import-controls select { width: 100%; box-sizing: border-box; }
+.ops-workspace .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+.ops-workspace .metric { padding: 16px; min-width: 0; box-shadow: none; }
+.ops-workspace .metric strong { font-size: 23px; overflow-wrap: anywhere; }
+.ops-workspace .btn { margin-bottom: 6px; }
+.ops-workspace .table-wrap { max-height: 600px; overflow: auto; }
+#adzunaPosts { max-height: 480px; overflow: auto; }
+.ops-post-navigation { position: sticky; top: 0; background: #fff; display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 10px; border-bottom: 1px solid #dbe3ef; }
+.ops-outlook-link { justify-self: start; }
+@media (max-width: 650px) { .ops-workspace > .panel, .ops-workspace > .import-box { padding: 16px; } .ops-areas button { min-width: 0; flex: 1; } .ops-workspace .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

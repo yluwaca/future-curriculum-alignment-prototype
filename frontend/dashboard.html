@@ -1,0 +1,961 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FUTURE Decision Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+  <link rel="stylesheet" href="dashboard.css?v=20260910a">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css?v=20260824a">
+</head>
+<body>
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <nav class="breadcrumbs" id="breadcrumbs"></nav>
+          <h2 id="pageTitle">Overview</h2>
+          <p id="pageSubtitle">Available evidence, alignment readiness, demand signals, and decisions at a glance.</p>
+        </div>
+        <div class="userbox">
+          <div class="usertext">
+            <strong id="userName">Loading</strong>
+            <span id="userEmail">Loading</span>
+          </div>
+          <button class="btn" id="changePasswordBtn">Change Password</button>
+          <button class="btn primary" id="refreshBtn">Refresh</button>
+          <button class="btn danger" id="logoutBtn">Logout</button>
+        </div>
+      </header>
+
+      <div id="statusBox" class="status">Loading dashboard data...</div>
+      <div id="toastContainer" class="toast-container"></div>
+      <div id="confirmModal" class="modal-overlay hidden">
+        <div class="modal-box">
+          <h3 id="confirmTitle">Confirm</h3>
+          <p id="confirmMessage">Are you sure?</p>
+          <div class="modal-actions">
+            <button class="btn" id="confirmCancelBtn">Cancel</button>
+            <button class="btn primary" id="confirmOkBtn">OK</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="changePasswordModal" class="modal-overlay hidden">
+        <div class="modal-box">
+          <h3>Change Password</h3>
+          <label>Current Password</label>
+          <input type="password" id="cpCurrentPassword" placeholder="Enter current password" autocomplete="current-password">
+          <label>New Password</label>
+          <input type="password" id="cpNewPassword" placeholder="Enter new password (min 8 chars)" autocomplete="new-password">
+          <label>Confirm New Password</label>
+          <input type="password" id="cpConfirmPassword" placeholder="Confirm new password" autocomplete="new-password">
+          <div class="modal-actions">
+            <button class="btn" id="cpCancelBtn">Cancel</button>
+            <button class="btn primary" id="cpConfirmBtn">Change Password</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="pipelineJobModal" class="modal-overlay hidden">
+        <div class="modal-box wide">
+          <h3>Select Ingestion Job to Process</h3>
+          <p>Choose a completed StatsSA ingestion job that has not been processed yet.</p>
+          <div id="pipelineJobList" class="scroll-list"></div>
+          <div id="pipelineJobEmpty" class="inline-status" style="display:none">All completed StatsSA jobs have been processed.</div>
+          <div class="modal-actions">
+            <button class="btn" id="pipelineJobCancelBtn">Cancel</button>
+            <button class="btn primary" id="pipelineJobRunBtn" disabled>Process Selected</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="forecastExplanationModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="forecastExplanationTitle">
+        <div class="modal-box wide forecast-explanation-modal" tabindex="-1">
+          <div class="panel-head forecast-explanation-modal__header">
+            <div>
+              <h3 id="forecastExplanationTitle">Forecast Explanation</h3>
+              <small id="forecastExplanationSkill">Selected skill</small>
+            </div>
+            <button class="btn ghost sm" id="forecastExplanationCloseBtn" type="button" aria-label="Close forecast explanation">Close</button>
+          </div>
+          <dl class="forecast-explanation-summary">
+            <div><dt>Skill</dt><dd id="forecastExplanationSkillName">-</dd></div>
+            <div><dt>Method</dt><dd id="forecastExplanationMethod">-</dd></div>
+            <div><dt>Confidence</dt><dd id="forecastExplanationConfidence">-</dd></div>
+            <div><dt>Direction</dt><dd id="forecastExplanationDirection">-</dd></div>
+            <div><dt>Current demand</dt><dd id="forecastExplanationBaseline">-</dd></div>
+            <div><dt>Projected demand</dt><dd id="forecastExplanationProjected">-</dd></div>
+          </dl>
+          <div class="forecast-explanation-copy">
+            <h4>Plain-language interpretation</h4>
+            <p id="forecastExplanationPlainText">-</p>
+            <h4>Model explanation</h4>
+            <p id="forecastExplanationRawText">-</p>
+          </div>
+          <div class="forecast-explanation-copy" id="forecastExplanationProvenanceWrap" style="margin-top:10px">
+            <h4>Source &amp; provenance dossier</h4>
+            <div id="forecastExplanationProvenance">-</div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn primary sm" id="forecastExplanationDoneBtn" type="button">Done</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== EXECUTIVE DASHBOARD ========== -->
+      <section id="executive" class="view active">
+        <div class="metrics">
+          <div class="metric"><span>Curriculum Records</span><strong id="metricDocuments">0</strong><small>Documents + programmes</small></div>
+          <div class="metric"><span>Skills Mapped</span><strong id="metricSkills">0</strong><small>Evidence mappings created</small></div>
+          <div class="metric"><span>Average Alignment</span><strong id="metricAlignment">0%</strong><small>Latest generated scores</small></div>
+          <div class="metric"><span>Pending Reviews</span><strong id="metricPending">0</strong><small>Human decisions required</small></div>
+        </div>
+        <div class="grid">
+          <div class="panel span-12">
+            <div class="panel-head"><h3>Recommendation Priorities</h3><small id="recommendationCount">0 total</small></div>
+            <div id="recommendationPriorityBars" class="bar-list"></div>
+            <div id="spinnerRecommendationPriorities" class="spinner-wrap hidden"><div class="spinner"></div><span>Loading...</span></div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head"><h3>Latest Recommendations</h3><small>Review queue</small></div>
+            <div class="search-bar">
+              <input type="search" id="recommendationSearch" autocomplete="off" data-form-type="other" placeholder="Search by recommendation, programme, module, status, or priority...">
+              <label class="sr-only" for="recommendationStatusFilter">Recommendation status</label>
+              <select id="recommendationStatusFilter" aria-label="Recommendation status">
+                <option value="pending_review" selected>All pending reviews</option>
+                <option value="all">All recommendations</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Recommendation</th><th>Priority</th><th>Status</th><th>Evidence</th><th>Confidence</th><th>Action</th></tr></thead>
+                <tbody id="latestRecommendations"></tbody>
+              </table>
+            </div>
+            <div id="recommendationPagination" class="pagination"></div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head"><h3>Recommendation Dossier</h3><small id="dossierCaption">Select a recommendation</small></div>
+            <div id="recommendationDossier" class="empty">Select a recommendation to review its evidence, forecast, explanations, and decision history.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== CURRICULUM DASHBOARD ========== -->
+      <section id="curriculum" class="view">
+        <div class="metrics">
+          <div class="metric"><span>Curriculum Records</span><strong id="curriculumDocuments">0</strong><small>Documents + programmes</small></div>
+          <div class="metric"><span>Programmes</span><strong id="curriculumVersions">0</strong><small>Imported qualifications</small></div>
+          <div class="metric"><span>Modules</span><strong id="curriculumChunks">0</strong><small>Normalised modules</small></div>
+          <div class="metric"><span>Quality Score</span><strong id="curriculumAvgQuality">-</strong><small>Completeness + extraction readiness</small></div>
+          <div class="metric"><span>Last Evidence Update</span><strong id="curriculumLastIngestion">-</strong><small>Most recent curriculum evidence</small></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Curriculum Quality Notes</h3><small>Completeness checks and next actions</small></div>
+          <div id="curriculumQualityNotes" class="empty">Load curriculum quality summary to see completeness notes.</div>
+        </div>
+        <div class="panel" id="curriculumListPanel">
+          <div class="panel-head">
+            <h3>Curriculum Records</h3>
+            <small id="curriculumTableCaption">Most recent first</small>
+            <button class="btn" id="refreshCurriculumBtn">Refresh</button>
+          </div>
+          <div class="search-bar">
+            <input id="curriculumSearch" placeholder="Search by title, faculty, programme...">
+            <select id="curriculumStatusFilter">
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="archived">Archived</option>
+              <option value="pending">Pending</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Title</th><th>Faculty</th><th>Programme</th><th>Created</th><th>Record Type</th><th>Modules / Chunks</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="curriculumTable"></tbody>
+            </table>
+          </div>
+          <div id="curriculumPagination" class="pagination"></div>
+        </div>
+        <div id="curriculumDetailPanel" class="panel" style="display:none">
+          <div class="panel-head">
+            <h3 id="curriculumDetailTitle">Document Detail</h3>
+            <button class="btn" id="curriculumDetailClose">Back to list</button>
+          </div>
+          <div id="curriculumDetailContent"></div>
+        </div>
+        <div class="panel viewer-hidden">
+          <div class="panel-head"><h3>Recent Ingestion Jobs</h3><small>Curriculum-related import activity</small></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Job ID</th><th>Source</th><th>Status</th><th>Records</th><th>Started</th></tr></thead>
+              <tbody id="curriculumJobRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SKILLS ALIGNMENT ========== -->
+      <section id="skills" class="view">
+        <div class="actions mb-4">
+          <button class="btn" id="refreshSkillsBtn">Refresh</button>
+        </div>
+        <div class="metrics">
+          <div class="metric"><span>Canonical Skills</span><strong id="skillTotal">-</strong><small>Reference skill catalogue</small></div>
+          <div class="metric"><span>Curriculum Mappings</span><strong id="skillCurriculumMappings">-</strong><small>Skills evidenced in curriculum</small></div>
+          <div class="metric"><span>Labour Mappings</span><strong id="skillLabourMappings">-</strong><small>Skills evidenced in labour-market data</small></div>
+          <div class="metric"><span>Gaps Identified</span><strong id="skillGapCount">-</strong><small>Latest reviewed alignment gaps</small></div>
+        </div>
+        <div class="panel skills-findings-panel">
+          <div class="panel-head">
+            <h3>Alignment Findings</h3>
+            <small id="skillGapCaption">Latest findings from reviewed mapping evidence</small>
+          </div>
+          <p class="interpretation-note"><strong>Interpretation note:</strong> A gap is a difference between available curriculum and labour-market evidence. It does not by itself prove that a module must be added, removed, or changed.</p>
+          <div class="search-bar">
+            <input id="skillGapSearch" placeholder="Filter by skill name or key..." aria-label="Filter alignment findings by skill">
+            <select id="skillGapTypeFilter" aria-label="Filter alignment findings by gap type">
+              <option value="">All gap types</option>
+              <option value="missing">Missing</option>
+              <option value="weak_alignment">Weak Alignment</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>Skill</th><th>Gap Type</th><th>Demand</th><th>Forecast</th><th>Recommendation</th><th>Evidence</th></tr></thead>
+              <tbody id="skillGapRows"></tbody>
+            </table>
+          </div>
+          <div id="skillGapPagination" class="pagination"></div>
+          <section id="skillGapEvidenceSection" class="skills-evidence-detail hidden" aria-live="polite">
+            <div class="panel-head"><h3>Finding Details</h3><small id="skillGapEvidenceCaption"></small></div>
+            <div id="skillGapEvidencePanel"></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- ========== FORECAST DASHBOARD ========== -->
+      <section id="forecast" class="view">
+        <div class="actions mb-4">
+          <button class="btn" id="refreshForecastBtn">Refresh</button>
+        </div>
+        <div class="metrics">
+          <div class="metric"><span>Forecasts</span><strong id="forecastCount">-</strong><small>Generated outputs</small></div>
+          <div class="metric"><span>Increasing Trends</span><strong id="forecastIncreasing">-</strong><small>Demand pressure</small></div>
+          <div class="metric"><span>Average Confidence</span><strong id="forecastConfidence">-</strong><small>Baseline confidence</small></div>
+          <div class="metric viewer-hidden analyst-hidden"><span>Model Maturity</span><strong id="modelMaturity">-</strong><small id="modelMaturityCaption">Baseline status</small></div>
+        </div>
+        <div class="panel viewer-hidden analyst-hidden">
+          <div class="panel-head"><h3>Forecast Model Readiness</h3><small>Baseline and ML promotion gates</small></div>
+          <div id="modelReadinessPanel" class="empty">Model readiness has not been loaded yet.</div>
+          <div id="spinnerModelReadiness" class="spinner-wrap hidden"><div class="spinner"></div><span>Loading model readiness...</span></div>
+        </div>
+        <div class="panel viewer-hidden analyst-hidden">
+          <div class="panel-head">
+            <h3>Forecast Quality</h3>
+            <small>Forecast confidence, model maturity, and known limitations</small>
+            <div class="actions">
+              <button class="btn" id="loadForecastQualityBtn">Load Quality Report</button>
+            </div>
+          </div>
+            <div id="forecastQualityPanel" class="empty">Load quality report to review forecast and recommendation quality.</div>
+            <div id="spinnerForecastQuality" class="spinner-wrap hidden"><div class="spinner"></div><span>Loading quality report...</span></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Forecast Outputs</h3><small>Skill demand projections</small></div>
+          <div class="decision-limitation"><strong>Interpretation limit:</strong> Forecast values depend on the available time period, signal coverage and modelling assumptions. Use direction, confidence, backtesting and source evidence together; never treat a projection as a guaranteed outcome.</div>
+          <div class="search-bar"><input id="forecastSearch" placeholder="Filter by skill..."></div>
+          <p class="forecast-baseline-note">Current projections utilize transparent statistical baselines. Varied ML-driven trends and directions will populate once model readiness gates are unblocked.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Skill / occupation</th><th>Current demand</th><th>Projected demand</th><th>Direction</th><th>Confidence</th><th class="viewer-hidden analyst-hidden">Method</th><th class="viewer-hidden analyst-hidden">Type</th><th>Evidence date</th><th>Explanation</th></tr></thead>
+              <tbody id="forecastRows"></tbody>
+            </table>
+          </div>
+          <div id="forecastPagination" class="pagination"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Labour demand signals</h3><small>Generated from approved skill mappings on imported job-posting evidence</small></div>
+          <div id="adzunaTrialOutlookPanel" class="empty">No labour demand signals yet. Run the Labour-market Skill Pipeline, review mappings in Skills Alignment, then generate labour demand signals.</div>
+        </div>
+      </section>
+
+      <!-- ========== GOVERNANCE DASHBOARD ========== -->
+      <section id="governance" class="view">
+        <div class="metrics">
+          <div class="metric"><span>Reviews</span><strong id="governanceReviews">0</strong><small>Human decisions</small></div>
+          <div class="metric"><span>Feedback Items</span><strong id="governanceFeedback">0</strong><small>Reviewer comments</small></div>
+          <div class="metric"><span>Status Changes</span><strong id="governanceHistory">0</strong><small>Recommendation transitions</small></div>
+        </div>
+        <div class="grid">
+          <div class="panel span-4">
+            <div class="panel-head"><h3>Review Status</h3><small>Recommendation lifecycle</small></div>
+            <div id="statusBars" class="bar-list"></div>
+          </div>
+          <div class="panel span-8 governance-audit-panel">
+            <div class="panel-head"><h3>Recent Governance Events</h3><small>Review and feedback trail</small></div>
+            <div class="search-bar"><input id="governanceSearch" placeholder="Filter by type or status..."></div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Type</th><th>Status</th><th>Reason</th><th>Reviewer</th><th>Date</th></tr></thead>
+                <tbody id="governanceRows"></tbody>
+              </table>
+            </div>
+            <div id="governancePagination" class="pagination"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== REPORTS ========== -->
+      <section id="reports" class="view">
+        <div class="panel">
+          <div class="panel-head"><h3>Exportable Reports</h3><small>Generated from current dashboard data</small></div>
+          <div class="report-list">
+            <div class="report-row">
+              <div><strong>Executive Summary</strong><span>Core KPIs, recommendations, forecasts, and governance counts.</span></div>
+              <div class="actions"><button class="btn viewer-hidden" data-export="executive-json">JSON</button><button class="btn" data-export="executive-csv">CSV</button><button class="btn" data-export="executive-pdf">PDF</button></div>
+            </div>
+            <div class="report-row">
+              <div><strong>Curriculum Alignment Report</strong><span>Documents, versions, chunks, and latest alignment scores.</span></div>
+              <div class="actions"><button class="btn viewer-hidden" data-export="curriculum-json">JSON</button><button class="btn" data-export="curriculum-csv">CSV</button><button class="btn" data-export="curriculum-pdf">PDF</button></div>
+            </div>
+            <div class="report-row">
+              <div><strong>Skill Gap Report</strong><span>Skill catalogue, mappings, and gap evidence.</span></div>
+              <div class="actions"><button class="btn viewer-hidden" data-export="skills-json">JSON</button><button class="btn" data-export="skills-csv">CSV</button><button class="btn" data-export="skills-pdf">PDF</button></div>
+            </div>
+            <div class="report-row">
+              <div><strong>Governance Audit Report</strong><span>Recommendation reviews, feedback, and status history.</span></div>
+              <div class="actions"><button class="btn viewer-hidden" data-export="governance-json">JSON</button><button class="btn" data-export="governance-csv">CSV</button><button class="btn" data-export="governance-pdf">PDF</button></div>
+            </div>
+            <div class="report-row viewer-hidden">
+              <div><strong>Ingestion Quality Report</strong><span>Contracts, quality summaries, and cleaned-record readiness.</span></div>
+              <div class="actions"><button class="btn" data-export="ingestion-json">JSON</button><button class="btn" data-export="ingestion-csv">CSV</button><button class="btn" data-export="ingestion-pdf">PDF</button></div>
+            </div>
+          </div>
+          <div class="panel-head viewer-hidden mt-5"><h3>Saved Evidence Snapshots</h3><small>Open a saved report to inspect the evidence captured at that time</small></div>
+          <div class="table-wrap viewer-hidden">
+            <table>
+              <thead><tr><th>Report</th><th>Type</th><th>Generated By</th><th>Created</th><th>Action</th></tr></thead>
+              <tbody id="generatedReportRows"></tbody>
+            </table>
+          </div>
+          <div id="generatedReportDetailPanel" class="empty viewer-hidden mt-4 mb-4">Select View to inspect a saved evidence snapshot.</div>
+        </div>
+      </section>
+
+      <!-- ========== SYSTEM DOCUMENTATION ========== -->
+      <section id="systemDocumentation" class="view">
+
+        <div class="panel">
+          <div class="panel-head"><h3>FUTURE System Documentation</h3><small>Complete reference &mdash; purpose, roles, requirements, deployment, architecture, operating procedure, testing and limitations</small></div>
+          <p>This page is the in-portal system reference. It describes <strong>implemented behaviour only</strong>: real screens, real endpoints, real scripts, real test commands and recorded evidence. Synthetic data, trial-UAT outputs and deferred validation are labelled explicitly and must not be reported as empirical findings.</p>
+          <p class="sd-caution"><strong>Evidence classes used throughout this page</strong> <span class="sd-evidence-class sd-ev-uat">technical UAT</span> operator-run reproducibility tests &middot; <span class="sd-evidence-class sd-ev-synthetic">synthetic</span> simulated offline data &middot; <span class="sd-evidence-class sd-ev-public">public evidence</span> official sources with provenance &middot; <span class="sd-evidence-class sd-ev-deferred">deferred validation</span> expert/institutional validation still pending.</p>
+          <div class="sd-toc" id="sd-toc">
+            <div class="sd-toc-col">
+              <h4>Getting started</h4>
+              <a href="#sd-purpose"><span class="sd-toc-num">1</span>System purpose and scope</a>
+              <a href="#sd-roles"><span class="sd-toc-num">2</span>Intended users and RBAC roles</a>
+              <a href="#sd-requirements"><span class="sd-toc-num">3</span>System requirements</a>
+            </div>
+            <div class="sd-toc-col">
+              <h4>Operate the system</h4>
+              <a href="#sd-deployment"><span class="sd-toc-num">4</span>Installation and deployment</a>
+              <a href="#sd-operate"><span class="sd-toc-num">7</span>End-to-end operating procedure</a>
+              <a href="#sd-quality"><span class="sd-toc-num">9</span>Quality controls</a>
+              <a href="#sd-model-training"><span class="sd-toc-num">10</span>Model training and evaluation</a>
+              <a href="#sd-recommendations"><span class="sd-toc-num">11</span>Recommendation and decision support</a>
+            </div>
+            <div class="sd-toc-col">
+              <h4>Architecture and governance</h4>
+              <a href="#sd-architecture"><span class="sd-toc-num">5</span>Architecture</a>
+              <a href="#sd-data-model"><span class="sd-toc-num">6</span>Data model and provenance</a>
+              <a href="#sd-providers"><span class="sd-toc-num">8</span>Provider configuration</a>
+              <a href="#sd-security"><span class="sd-toc-num">12</span>Security and governance</a>
+            </div>
+            <div class="sd-toc-col">
+              <h4>Testing and troubleshooting</h4>
+              <a href="#sd-troubleshooting"><span class="sd-toc-num">13</span>Troubleshooting and recovery</a>
+              <a href="#sd-testing"><span class="sd-toc-num">14</span>Testing</a>
+              <a href="#sd-limitations"><span class="sd-toc-num">15</span>Limitations and deferred work</a>
+            </div>
+            <div class="sd-toc-col">
+              <h4>Diagrams and appendix</h4>
+              <a href="#diagram-a"><span class="sd-toc-num">A</span>High-level architecture</a>
+              <a href="#diagram-b"><span class="sd-toc-num">B</span>End-to-end evidence flow</a>
+              <a href="#diagram-c"><span class="sd-toc-num">C</span>Deployment and runtime services</a>
+              <a href="#diagram-d"><span class="sd-toc-num">D</span>RBAC and review workflow</a>
+              <a href="#diagram-e"><span class="sd-toc-num">E</span>Data lineage source to recommendation</a>
+              <a href="#sd-evidence-index"><span class="sd-toc-num">16</span>Documentation and evidence index</a>
+            </div>
+          </div>
+        </div>
+
+        <p class="sd-group-title">Getting started</p>
+
+        <div class="sd-panel" id="sd-purpose">
+          <details open>
+            <summary>1&period; System purpose and scope</summary>
+            <div class="sd-body">
+              <p><strong>Purpose.</strong> FUTURE is a curriculum&ndash;labour-market alignment platform. It prepares and explains governed evidence so that curriculum administrators, analysts, academics and governance reviewers can make better-informed programme decisions. It is decision support &mdash; it does not replace curriculum committees, and nothing is applied to a curriculum automatically.</p>
+              <p><strong>In scope.</strong> Curriculum evidence intake and validation, labour-market source ingestion, skill extraction and mapping review, demand-signal generation and the Demand Outlook, recommendation building with human-gated approval, decision history, and exportable reports and saved snapshots. Every record is checksummed, versioned and traceable to its source and ingestion job.</p>
+              <p><strong>Out of scope (and not claimed).</strong> Automatic curriculum change, empirical validity of synthetic or trial-UAT model outputs, institution-specific CHE/DHET evidence (unverified until obtained), and independent expert validation (deferred).</p>
+              <p class="sd-caution">The four evidence classes in the banner above keep these distinctions visible throughout every section of this reference.</p>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <div class="sd-panel" id="sd-roles">
+          <details open>
+            <summary>2&period; Intended users and RBAC roles</summary>
+            <div class="sd-body">
+              <p>Access is role-based and enforced server-side; the sidebar renders only the workspaces each role includes. Approval of users and role assignment is performed by Administrators from <strong>User Admin</strong>. The five roles are <strong>Viewer</strong>, <strong>Analyst</strong>, <strong>Data Scientist</strong>, <strong>Curriculum Approver</strong> and <strong>Administrator</strong>.</p>
+              <figure class="sd-diagram" id="diagram-d">
+<pre class="mermaid">
+graph LR
+    V[Viewer] -->|read-only decisions| DP[Decision portal]
+    AN[Analyst] -->|ingest + review + label| DO[Data Operations]
+    DS[Data Scientist] -->|datasets + candidates + evaluation| ML[Model Lab]
+    CA[Curriculum Approver] -->|final academic approval| REC[Recommendations]
+    AD[Administrator] -->|users + activation + operations| SO[System Operations]
+    CM[candidate skill mapping] --> WB[review workbench]
+    WB -->|approve| OK[approved mapping promoted to evidence]
+    WB -->|reject| NO[rejected mapping excluded]
+    REC -->|approve / reject / modify + rationale| DH[decision history + audit log]
+    CA -. admin cannot exercise .-> REC
+</pre>
+                <figcaption>Diagram D &mdash; RBAC and review workflow: least-privilege workspaces, approved-only mapping promotion, and the administrator-excluded final academic approval.</figcaption>
+                <p class="sd-diagram-offline">Requires internet for the Mermaid renderer. If the diagram does not appear, the code block above is the Mermaid source.</p>
+              </figure>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Capability</th>
+                      <th class="cell-center">Viewer</th>
+                      <th class="cell-center">Analyst</th>
+                      <th class="cell-center">Data Scientist</th>
+                      <th class="cell-center">Curriculum Approver</th>
+                      <th class="cell-center">Admin</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>View dashboards, recommendations and decision history</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-yes">&#10003;</td></tr>
+                    <tr><td>Download reports (CSV / PDF) and inspect saved snapshots</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-yes">&#10003;</td></tr>
+                    <tr><td>Upload and ingest sources (curriculum PDFs, job datasets)</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td></tr>
+                    <tr><td>Validate subject profiles and curriculum evidence</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td></tr>
+                    <tr><td>Label alignment tasks independently</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td></tr>
+                    <tr><td>Run the processing pipeline</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td></tr>
+                    <tr><td>Lock reviewed-label datasets for training</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td></tr>
+                    <tr><td>Train and evaluate candidate models (Model Lab)</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td></tr>
+                    <tr><td>Promote or roll back an active model</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td></tr>
+                    <tr><td>Record recommendation decisions (approve / reject / modify)</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-yes">&#10003;</td></tr>
+                    <tr><td><strong>Final academic approval of recommendations</strong></td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td><td class="cell-center matrix-no"><strong>excluded by design</strong></td></tr>
+                    <tr><td>Approve users, assign roles, reset passwords</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td></tr>
+                    <tr><td>System Operations: health, backups, deployment, UAT</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-no">&mdash;</td><td class="cell-center matrix-yes">&#10003;</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p><strong>Governance note:</strong> final academic approval (<code>recommendation.academic_approve</code>) is deliberately restricted to Curriculum Approvers. Even Administrators cannot exercise or bypass it &mdash; this separation is enforced server-side, not just hidden in the interface.</p>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <div class="sd-panel" id="sd-requirements">
+          <details>
+            <summary>3&period; System requirements</summary>
+            <div class="sd-body">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Area</th><th>Requirement</th></tr></thead>
+                  <tbody>
+                    <tr><td><strong>Browser</strong></td><td>A modern evergreen browser with JavaScript enabled (Chrome 90+, Edge, Firefox 88+, Safari 14+). The portal is static HTML/CSS/JavaScript; no installation is required for users.</td></tr>
+                    <tr><td><strong>Network access</strong></td><td>LAN access to the NGINX front door (HTTP port 8080, HTTPS 8443 by default). The API is served through the same origin (<code>/api/v1&hellip;</code>, proxied by NGINX). Optional outbound internet is used only for CDN assets (font and jsPDF export libraries; Mermaid diagram rendering on this page).</td></tr>
+                    <tr><td><strong>Server / VM</strong></td><td>A Linux Docker host (reference deployment runs Ubuntu with OpenSSH). Three containers: <code>postgres</code> (PostgreSQL 16 + pgvector), <code>backend</code> (built from <code>backend/Dockerfile</code>), <code>nginx</code> (<code>nginx:1.27-alpine</code>). Capacity is sized for the expected data volume; the system stores checksummed evidence linearly and should not be run on shared throwaway volumes.</td></tr>
+                    <tr><td><strong>Docker and Compose</strong></td><td>Docker + Compose v2. Reference scripts: <code>Deploy/deploy/linux/bootstrap-docker.sh</code>, <code>configure-docker.sh</code>, <code>start-docker.sh</code>, <code>health-docker.sh</code>, <code>stop-docker.sh</code>, <code>create-admin-docker.sh</code>.</td></tr>
+                    <tr><td><strong>Database</strong></td><td>PostgreSQL 16 with the <code>pgvector</code> extension. A healthy state shows <strong>Vector Backend = pgvector</strong>; if the extension is unavailable the system must report <em>not ready</em> rather than silently fall back.</td></tr>
+                    <tr><td><strong>Storage</strong></td><td>Named volumes <code>postgres_data</code> and <code>backend_data</code> preserved across stop/start/rebuilds. Encrypted backup bundles (database + files) are written with a manifest and verification by the backup service and pruned by its retention plan.</td></tr>
+                    <tr><td><strong>Environment variables</strong></td><td>Provided by the deployment secret manager / <code>.env</code> equivalent: <code>ENVIRONMENT</code>, <code>DATABASE_URL</code> (or <code>POSTGRES_DB/USER/PASSWORD</code>), <code>SECRET_KEY</code>, <code>SECRET_PROVIDER</code>, <code>SECRET_ROTATION_OWNER</code>, <code>SECRET_ROTATION_DAYS</code>, <code>JWT_ISSUER</code>, <code>JWT_AUDIENCE</code>, <code>CORS_ORIGINS</code>, <code>DATABASE_SSL_MODE</code>, <code>DEBUG</code>, <code>RELOAD</code>, <code>ENABLE_DOCS</code>, <code>ENABLE_BOOTSTRAP_ADMIN</code>, <code>REQUIRE_HTTPS</code>, <code>TRUST_PROXY_HEADERS</code>, <code>HTTP_PORT</code>, <code>HTTPS_PORT</code>.</td></tr>
+                    <tr><td><strong>Provider credentials</strong></td><td>Adzuna API credentials are stored <strong>encrypted</strong> (Fernet) by <code>backend/scripts/configure_adzuna_credentials.py</code> &mdash; never in <code>.env</code> or source. The <code>synthetic</code> provider needs no credentials. StatsSA/CHE/CPUT are public document sources, not authenticated APIs.</td></tr>
+                    <tr><td><strong>Backup requirements</strong></td><td>Encrypted backups with manifest and verification; isolated restore drill on a temporary database (the live database is never a restore target); retention plan applied by an administrator; rollback status reviewed before rehearsal.</td></tr>
+                    <tr><td><strong>Minimum test environment</strong></td><td>A local Python environment with the backend test suite, a test database, the <code>synthetic</code> job-board provider (<code>FUTURE_SYNTHETIC_JOBS_BASE_URL</code> pointed at the loopback fixture), and the documented model-UAT script (<code>run_model_training_readiness_uat.py --seed 42 --size 600</code>).</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>How the FUTURE Platform works</h3><small>Input &ndash; Processing &ndash; Output at a glance</small></div>
+          <div class="doc-flow">
+            <div class="doc-flow-step">
+              <p class="flow-stage">Input</p>
+              <h4>Evidence comes in</h4>
+              <ul>
+                <li><strong>Curriculum:</strong> prospectuses, study guides, syllabi and module descriptors via PDF upload, API import or CPUT prospectus import.</li>
+                <li><strong>Labour-market trends:</strong> StatsSA QLFS and CHE VitalStats publications.</li>
+                <li><strong>Current jobs:</strong> uploaded job-advert datasets and simulated job-board feeds (synthetic board and the Adzuna API source under academic research permission).</li>
+              </ul>
+            </div>
+            <div class="doc-flow-arrow" aria-hidden="true">&#8594;</div>
+            <div class="doc-flow-step">
+              <p class="flow-stage">Processing</p>
+              <h4>The system makes sense of it</h4>
+              <ul>
+                <li>Every record is checksummed, versioned and traceable to its source and ingestion job.</li>
+                <li>Text is cleaned, normalised and linked to canonical skills with confidence scores.</li>
+                <li>Only approved mappings promote to demand evidence; datasets are fingerprint-locked before any training.</li>
+                <li>The baseline alignment model and demand signals prepare interpretable, evidence-backed outputs.</li>
+              </ul>
+            </div>
+            <div class="doc-flow-arrow" aria-hidden="true">&#8594;</div>
+            <div class="doc-flow-step">
+              <p class="flow-stage">Output</p>
+              <h4>People decide with evidence</h4>
+              <ul>
+                <li>Alignment scores and skill-gap summaries per programme and module.</li>
+                <li>Demand outlooks with confidence levels and stated limitations.</li>
+                <li>Evidence-backed recommendations that require human approval before action.</li>
+                <li>Auditable decision history and exportable reports for committees.</li>
+              </ul>
+            </div>
+          </div>
+          <p>The platform is decision support: it prepares and explains evidence, but qualified staff remain responsible for interpretation, approval and action. Nothing is applied to a curriculum automatically.</p>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Technology, in plain language</h3><small>What runs under the hood and why it matters to you</small></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Component</th><th>In one sentence</th><th>What it does for you</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Web portal</strong></td><td>The pages you are using now (HTML/CSS/JavaScript).</td><td>Dashboards, review queues and reports &mdash; no installation needed.</td></tr>
+                <tr><td><strong>API service</strong></td><td>A FastAPI application that enforces every rule centrally.</td><td>Permissions, audit trails and data validation are applied consistently on the server, not in your browser.</td></tr>
+                <tr><td><strong>Database (PostgreSQL + pgvector)</strong></td><td>The system of record, with vector search built in.</td><td>Stores evidence, decisions and models; finds conceptually similar text even when wording differs.</td></tr>
+                <tr><td><strong>XGBoost alignment model</strong></td><td>A decision-tree ensemble trained only on a locked, reviewed alignment-label snapshot.</td><td>Tests whether curriculum-demand alignment can be predicted under chronological and grouped validation; a trained candidate is not automatically eligible for use.</td></tr>
+                <tr><td><strong>LSTM forecasting model</strong></td><td>A neural network for time-series demand signals.</td><td>Projects demand direction, always shown with transparent baseline comparisons and maturity status.</td></tr>
+                <tr><td><strong>SHAP explainability</strong></td><td>An attribution method for tree models.</td><td>Shows which factors pushed each prediction up or down &mdash; no black-box outputs.</td></tr>
+                <tr><td><strong>NGINX + TLS</strong></td><td>The front door that serves pages and secures traffic.</td><td>HTTPS encryption and controlled access to the platform.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Model Lab evidence and lifecycle</h3><small>Candidate registry, gates, and promotion</small></div>
+          <p>Successful training creates an immutable <strong>candidate</strong> registry entry; it does not automatically make the model active. Candidate metrics, declared non-leaking baselines, chronological/grouped folds, threshold/calibration evidence, and TreeSHAP output remain visible when promotion gates are blocked. Select a registry candidate, run <strong>Check Gates</strong>, attach genuine automated-test evidence, evaluate it, obtain authorised approval, and promote only if every gate passes. Durable Model Jobs and Training Job Status show the same server-side jobs at detailed and summary levels.</p>
+          <p class="sd-caution"><strong>Current technical result (verified 1 October 2026):</strong> the latest reviewed snapshot has 993 rows and 40 positive examples (4.03%). Worst chronological-fold F1 is 0, mean chronological-fold F1 is 0.0192 and ECE is 0.1184. The candidate is retained as technical evidence and is not promoted. Current audited recommendations disclose <code>canonical_signal_weighted_baseline_v2</code> as their method; the portal must not imply that they were produced by the blocked XGBoost candidate.</p>
+        </div>
+
+        <p class="sd-group-title">Operate the system</p>
+
+        <div class="sd-panel" id="sd-deployment">
+          <details open>
+            <summary>4&period; Installation and deployment</summary>
+            <div class="sd-body">
+              <p>The reference deployment is a Linux Docker host running three Compose services: <code>postgres</code> (PostgreSQL 16 + pgvector, SSL certificates, <code>pg_isready</code> health check), <code>backend</code> (built from <code>backend/Dockerfile</code>; reference env sets <code>DEBUG=false</code> and <code>REQUIRE_HTTPS=true</code>), and <code>nginx</code> (<code>nginx:1.27-alpine</code>) which serves <code>./frontend</code> read-only and proxies <code>/api/v1/&hellip;</code> to the backend. NGINX configuration: <code>Deploy/nginx/conf/future.production.conf</code>. HTTP is served on port 8080 and HTTPS on 8443 by default; the API is same-origin (<code>/api/v1/&hellip;</code>).</p>
+              <p class="sd-caution"><strong>Deployment evidence class:</strong> verified on the reference host (<code>future_validation_2022_r3</code> project) with <code>docker inspect --format &hellip; future_validation_2022_r3-backend-1</code> reporting a healthy container and the readiness endpoints below answering 200.</p>
+              <figure class="sd-diagram" id="diagram-c">
+<pre class="mermaid">
+flowchart TB
+    B[Browser] --> N[Nginx 1.27 alpine + TLS]
+    N -->|static files read-only| F[./frontend mounted in container]
+    N -->|/api/v1/* proxied| A[FastAPI backend container]
+    A --> P[(PostgreSQL 16 + pgvector)]
+    S[Deploy/deploy/linux scripts] -.-> H[Host: bootstrap, configure, start, health, stop, reset, create-admin]
+</pre>
+                <figcaption>Diagram C &mdash; Deployment and runtime services: one origin, server-side enforcement, and containerised data via named volumes (<code>postgres_data</code>, <code>backend_data</code>).</figcaption>
+                <p class="sd-diagram-offline">Requires internet for the Mermaid renderer. If the diagram does not appear, the code block above is the Mermaid source.</p>
+              </figure>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Script</th><th>Purpose</th></tr></thead>
+                  <tbody>
+                    <tr><td><code>bootstrap-docker.sh</code></td><td>Prepare a clean host: install and verify Docker + Compose v2.</td></tr>
+                    <tr><td><code>configure-docker.sh</code></td><td>Write environment configuration and generate secret material (env / secret-manager equivalent).</td></tr>
+                    <tr><td><code>start-docker.sh</code></td><td>Build and start the stack (database, then backend, then nginx).</td></tr>
+                    <tr><td><code>health-docker.sh</code></td><td>Run readiness and health checks plus container status.</td></tr>
+                    <tr><td><code>stop-docker.sh</code> / <code>reset-docker.sh</code></td><td>Stop the stack, or tear down application containers while preserving named data volumes.</td></tr>
+                    <tr><td><code>create-admin-docker.sh</code></td><td>Create the initial Administrator account.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p><strong>Service health.</strong> Live endpoints: <code>/ready</code>, <code>/health</code> and <code>/api/v1/ready</code> report service and dependency readiness; the System Operations page summarises these together with the vector backend state and container status.</p>
+              <h4>Configuration and environment variables</h4>
+              <p>Configuration is supplied as environment variables (or the deployment secret manager / <code>.env</code> equivalent). Provider credentials are the exception: Adzuna keys are stored <strong>encrypted</strong> (Fernet) by <code>backend/scripts/configure_adzuna_credentials.py</code> and are never placed in <code>.env</code> or source.</p>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Group</th><th>Variables</th></tr></thead>
+                  <tbody>
+                    <tr><td><strong>Database and environment</strong></td><td><code>ENVIRONMENT</code>, <code>DATABASE_URL</code> (or <code>POSTGRES_DB</code>, <code>POSTGRES_USER</code>, <code>POSTGRES_PASSWORD</code>), <code>DATABASE_SSL_MODE</code></td></tr>
+                    <tr><td><strong>Application settings</strong></td><td><code>HTTP_PORT</code>, <code>RELOAD</code>, <code>ENABLE_DOCS</code>, <code>ENABLE_BOOTSTRAP_ADMIN</code></td></tr>
+                    <tr><td><strong>Secrets and JWT</strong></td><td><code>SECRET_KEY</code>, <code>SECRET_PROVIDER</code>, <code>SECRET_ROTATION_OWNER</code>, <code>SECRET_ROTATION_DAYS</code>, <code>JWT_ISSUER</code>, <code>JWT_AUDIENCE</code></td></tr>
+                    <tr><td><strong>Transport and deployment flags</strong></td><td><code>DEBUG=false</code>, <code>REQUIRE_HTTPS</code>, <code>TRUST_PROXY_HEADERS</code>, <code>CORS_ORIGINS</code></td></tr>
+                    <tr><td><strong>Provider configuration</strong></td><td><code>FUTURE_SYNTHETIC_JOBS_BASE_URL</code> (loopback fixture for the <code>synthetic</code> provider); Adzuna credentials are Fernet-encrypted, never environment variables</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>The full list with defaults and per-service guidance lives in the deployment documentation (<code>Deploy/docs/</code>) and <code>docker-compose.yml</code>.</p>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <div class="sd-panel" id="sd-operate">
+          <details open>
+            <summary>7&period; End-to-end operating procedure</summary>
+            <div class="sd-body">
+              <p>The safe operating sequence moves evidence from source intake to a governed decision. Each step records who acted, what was decided, and which evidence supported it, so the trail is auditable end to end.</p>
+              <figure class="sd-diagram" id="diagram-b">
+<pre class="mermaid">
+flowchart LR
+    U[Upload / import sources] --> V[Subject profile validation]
+    V --> L[Import and normalise labour-market data]
+    L --> M[Generate mappings to canonical skills]
+    M --> R{Review workbench}
+    R -->|approved| DE[Demand evidence]
+    R -->|rejected| X[Rejected mapping excluded]
+    V --> CE[Curriculum evidence validation]
+    CE --> GT[Generate labelling tasks]
+    GT --> F1[First reviewer labels]
+    F1 --> F2[Second reviewer labels independently]
+    F2 --> ADJ{Disagreement?}
+    ADJ -->|no| OKL
+    ADJ -->|yes| ADJC[Adjudication] --> OKL
+    OKL[Locked reviewed-label dataset] --> TR[Train and evaluate candidate models]
+    TR --> G{Promotion gates}
+    G -->|pass| ACT[Active model]
+    G -->|fail| HOLD[Candidate retained with limitations]
+    ACT --> REC[Recommendation built with evidence dossier]
+    HOLD --> BASE[Eligible transparent method] --> REC
+    REC --> DEC{Decision: approve / reject / modify}
+    DEC --> AA[Final academic approval]
+    AA --> DR[Decision history + audit log]
+    DR --> EX[Reports, snapshots, exports]
+</pre>
+                <figcaption>Diagram B &mdash; End-to-end evidence flow from upload to decision: independent labelling with adjudication, approved-only mapping promotion, and a final human gate.</figcaption>
+                <p class="sd-diagram-offline">Requires internet for the Mermaid renderer. If the diagram does not appear, the code block above is the Mermaid source.</p>
+              </figure>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Step</th><th>Action and portal location</th></tr></thead>
+                  <tbody>
+                    <tr><td>1</td><td><strong>Upload and validate curriculum.</strong> Import official curriculum documents (prospectuses, study guides, syllabi, module descriptors) under <strong>Curriculum Documents</strong>; confirm each derived <strong>Subject Profile Validation</strong> record in <strong>Data Operations</strong>.</td></tr>
+                    <tr><td>2</td><td><strong>Import and normalise labour-market evidence.</strong> StatsSA QLFS and CHE VitalStats publications, uploaded job-advert datasets, the synthetic job-board feed, and the Adzuna API source under <strong>Data Operations</strong>.</td></tr>
+                    <tr><td>3</td><td><strong>Generate and review mappings.</strong> Link curriculum and labour-market text to canonical skills in <strong>Skill-Gap</strong>; approve or reject candidates in the mapping review workbench. Only approved mappings promote to demand evidence.</td></tr>
+                    <tr><td>4</td><td><strong>Validate curriculum evidence.</strong> Inspect extracted chunks in the validation window; approve, request <strong>Changes required</strong>, or <strong>Reject</strong> with a short evidence-based note (part of the audit trail).</td></tr>
+                    <tr><td>5</td><td><strong>Generate labelling tasks.</strong> Create independent alignment-label tasks with reviewer pairs and adjudication for disagreements.</td></tr>
+                    <tr><td>6</td><td><strong>Lock the reviewed-label dataset.</strong> Fingerprint-lock the snapshot (<code>labour-ds-v1-&lt;digest16&gt;</code>) for training.</td></tr>
+                    <tr><td>7</td><td><strong>Train and evaluate.</strong> Train candidates, run <strong>Check Gates</strong>, attach genuine automated-test evidence and retain the complete result. Promote in <strong>Model Lab</strong> only when every gate passes; a failed candidate remains valid technical evidence.</td></tr>
+                    <tr><td>8</td><td><strong>Recommend and decide.</strong> Review the evidence dossier, record <strong>approve / reject / modify</strong> with rationale; Curriculum Approver grants final academic approval; nothing is applied automatically.</td></tr>
+                    <tr><td>9</td><td><strong>Report and export.</strong> In <strong>Recommendations</strong>, confirm all four committee-readiness gates and select <strong>Generate committee evidence pack</strong>. Preserve the report ID, payload SHA-256 and PDF; use <strong>Reports &amp; Exports</strong> for other saved snapshots and formats.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <h4>Curriculum workflow</h4>
+              <p><strong>Prepare one subject end to end:</strong> upload an authorised subject guide, syllabus, module descriptor, curriculum map, prospectus or qualification standard under <strong>Curriculum Documents</strong>; wait for extraction and confirm the document is <strong>active</strong> in <strong>Curriculum Evidence</strong>. Validate the structured <strong>Subject Profile</strong> (institution, faculty, department, programme/qualification, subject code and name, evidence year, NQF level, credits, purpose, prerequisites). Validate the <strong>document evidence</strong> against the visible extracted chunks &mdash; approve, or choose <strong>Changes required</strong> / <strong>Reject</strong> with a short note that becomes audit history. Resolve duplicate or alias subject codes before proceeding, then <strong>Generate Evidence Mappings</strong>; high-confidence matches auto-approve, uncertain candidates enter the human review queue.</p>
+              <p><strong>Curriculum placement in this page:</strong> requirements in <a href="#sd-requirements">Section 3</a>, roles in <a href="#sd-roles">Section 2</a>, quality controls in <a href="#sd-quality">Section 9</a>, provenance in <a href="#sd-data-model">Section 6</a>. Step-by-step tasks: <strong>Help Manual &rarr;</strong> "Complete the curriculum evidence workflow", "Validate an uploaded curriculum subject profile", "Verify the curriculum governance chain".</p>
+              <h4>Labour-market workflow</h4>
+              <p><strong>Run the demand side:</strong> import vacancies under <strong>Data Operations &rarr; Labour</strong> (Adzuna API source within enforced bounds &mdash; page size 1&ndash;50, pages 1&ndash;250, at most 250 pages per run, rate-limited; or the <code>synthetic</code> provider with no credentials), under written academic research permission with attribution required. Use <strong>Preview request count</strong> before any run; saved postings list 50 at a time. Run <strong>Process skills</strong>, review candidate mappings against the actual advert text, then <strong>Generate demand</strong> &mdash; enabled only once approved mappings exist, and only approved mappings promote into demand signals and evidence. Import StatsSA QLFS quarters (public source) for time-indexed context and view the result in <strong>Demand Outlook</strong>.</p>
+              <p><strong>Labour placement in this page:</strong> providers and bounds in <a href="#sd-providers">Section 8</a>, model training in <a href="#sd-model-training">Section 10</a>, recommendations in <a href="#sd-recommendations">Section 11</a>. Step-by-step tasks: <strong>Help Manual &rarr;</strong> "Run the labour-market workflow", "Import and validate Stats SA QLFS evidence", "Test the Adzuna connector during the provider trial", "View the labour-market provider readiness report" (&ldquo;Provider readiness&rdquo; in <a href="#sd-providers">Section 8</a>).</p>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <div class="sd-panel" id="sd-quality">
+          <details open>
+            <summary>9&period; Quality controls</summary>
+            <div class="sd-body">
+              <ul>
+                <li><strong>Checksums and versioning.</strong> Every record stores a checksum and version and is traceable to its source and ingestion job, so a wrong or corrupted source cannot silently replace evidence.</li>
+                <li><strong>Subject Profile Validation.</strong> The structured profile used for reports is explicitly confirmed before release; the original upload and extracted chunks stay preserved for audit.</li>
+                <li><strong>Curriculum Evidence Validation.</strong> Reviewers approve, request changes, or reject a document version against visible extracted chunks; each decision carries a short note and becomes audit history.</li>
+                <li><strong>Independent labelling.</strong> Two reviewers label independently and disagreements go to adjudication; generated model scores are never shown to reviewers and never used as labels.</li>
+                <li><strong>Mapping review workbench.</strong> Only approved candidate mappings promote to demand evidence; rejected mappings are excluded, not hidden.</li>
+                <li><strong>Model promotion gates.</strong> Candidates carry metrics, declared baselines, chronological splits, threshold/calibration evidence, and TreeSHAP output; <strong>Check Gates</strong> requires genuine automated-test evidence before promotion.</li>
+                <li><strong>Evidence classes.</strong> The page banner distinguishes <span class="sd-evidence-class sd-ev-uat">technical UAT</span>, <span class="sd-evidence-class sd-ev-synthetic">synthetic</span>, <span class="sd-evidence-class sd-ev-public">public evidence</span> and <span class="sd-evidence-class sd-ev-deferred">deferred validation</span> so that claims never exceed what was actually recorded.</li>
+              </ul>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <div class="sd-panel" id="sd-model-training">
+          <details open>
+            <summary>10&period; Model training and evaluation</summary>
+            <div class="sd-body">
+              <p><strong>Reviewed labels only.</strong> Supervised alignment training uses a SHA-256-locked reviewed-label dataset, never ad-hoc labels and never model-generated scores. A labour-market mapping is not an alignment-training row: each training row represents one reviewed curriculum-demand comparison with its label, provenance and grouping/time fields.</p>
+              <p><strong>Evaluation.</strong> Candidates are assessed with chronological cross-validation or walk-forward folds, threshold/calibration evidence, and TreeSHAP explanations. The LSTM forecasting model is always shown against transparent baseline demand signals and its data-depth maturity status.</p>
+              <p><strong>Candidate identity and fingerprint.</strong> Every candidate is recorded with its exact dataset fingerprint and reviewed-label snapshot version. The Model Lab joins the metrics record to the model registry at read time (non-destructively) so the successful candidate, its dataset fingerprint, its lifecycle state and the experimental-UAT disclosure are unambiguous, while historical failed jobs remain visible and every prior candidate is retained append-only.</p>
+              <p><strong>Current dataset and evaluation.</strong> The latest locked reviewed snapshot contains 993 rows with 40 positive examples (4.03%). Chronological/grouped validation reports worst-fold F1 = 0, mean chronological-fold F1 = 0.0192 and ECE = 0.1184. Some boundaries cannot preserve both group isolation and class coverage because positives are sparse. These are honest technical findings, not a software failure.</p>
+              <p><strong>Promotion.</strong> A candidate is promoted only when gates pass: stable chronological/grouped folds, acceptable comparison with a non-leaking baseline, calibration within the declared threshold, genuine automated-test evidence, completed evaluation, authorised approval, and Administrator promotion. The current XGBoost candidate remains unpromoted. More genuinely distinct curriculum programmes/institutions and positive examples are future validation work; duplicated vacancies or rows must not be used to inflate performance.</p>
+              <p class="sd-caution"><span class="sd-evidence-class sd-ev-synthetic">synthetic</span> A synthetic development snapshot proves the workflow executes end to end (for example <code>run_model_training_readiness_uat.py --seed 42 --size 600</code>), but its metrics must not be reported as empirical research findings.</p>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <div class="sd-panel" id="sd-recommendations">
+          <details open>
+            <summary>11&period; Recommendation and decision support</summary>
+            <div class="sd-body">
+              <p>Recommendations are built from the evidence dossier: approved mapping evidence, forecast context, alignment explanation, and the decision history for the subject. Users record a decision (<strong>approve / reject / modify</strong>) with rationale.</p>
+              <ul>
+                <li><strong>Final academic approval</strong> (<code>recommendation.academic_approve</code>) is held only by Curriculum Approvers; Administrators are deliberately excluded and cannot exercise or bypass it.</li>
+                <li><strong>Zero-evidence gate.</strong> A recommendation with no resolvable labour-market evidence is marked non-actionable with a reason. It can be rejected but never approved until evidence generation re-supports it; existing zero-evidence items are retained and flagged, never silently deleted.</li>
+                <li><strong>Evidence-context fingerprint.</strong> Every review stores the reviewer identity and role, the before/after status, the reason, feedback, the evidence-reviewed acknowledgement, an evidence-context fingerprint, and the model/dataset version. These are exposed in Decision History and in the JSON/CSV/PDF reports.</li>
+                <li><strong>Nothing is automatic.</strong> The platform prepares and explains evidence; qualified staff remain responsible for interpretation, approval and action.</li>
+                <li><strong>Traceability.</strong> Every decision records who acted and why, and is available in the Governance view and in exportable CSV/PDF reports and saved snapshots.</li>
+                <li><strong>Method identity.</strong> The dossier states the actual recommendation method/model. Current audited decisions identify <code>canonical_signal_weighted_baseline_v2</code>; they must not be described as outputs of the blocked XGBoost candidate.</li>
+                <li><strong>Committee PDF.</strong> A Curriculum Approver can generate a pack only when validated regeneration, eligible recommendations, documented reviews and explanations are all ready. The generated report is immutable and carries its report ID, source-manifest ID/hash and payload SHA-256 before the browser downloads the PDF.</li>
+                <li><strong>Legacy review metadata.</strong> Historical review rows are append-only and are not rewritten. If an older row lacks a dataset/source field, the final pack states that limitation and anchors it transparently to the immutable validated-evidence manifest rather than inventing provenance.</li>
+              </ul>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <p class="sd-group-title">Architecture and governance</p>
+
+        <div class="sd-panel" id="sd-architecture">
+          <details open>
+            <summary>5&period; Architecture</summary>
+            <div class="sd-body">
+              <p>Three tiers behind one origin: the static frontend, the NGINX TLS front door, and the FastAPI backend with PostgreSQL 16 + pgvector. All decisions and validations are enforced server-side by the API; the browser renders views only.</p>
+              <figure class="sd-diagram" id="diagram-a">
+<pre class="mermaid">
+graph TB
+    subgraph Presentation
+        NGINX[Nginx static frontend + TLS]
+    end
+    subgraph API[FastAPI backend]
+        ROUTERS[Auth, Admin, Curriculum, Labour-market, Skills, Analytics, Ingestion]
+        SERVICES[Ingestion, skills, alignment, forecasting, recommendation, backup services]
+    end
+    subgraph Data
+        PG[(PostgreSQL 16 + pgvector)]
+    end
+    NGINX -->|/api/v1/*| ROUTERS
+    NGINX -->|static assets| F[frontend HTML/CSS/JS]
+    ROUTERS --- SERVICES
+    SERVICES --> PG
+</pre>
+                <figcaption>Diagram A &mdash; High-level architecture: one origin, server-side rule enforcement, pgvector semantic matching, and containerised data.</figcaption>
+                <p class="sd-diagram-offline">Requires internet for the Mermaid renderer. If the diagram does not appear, the code block above is the Mermaid source.</p>
+              </figure>
+              <p><strong>Key components.</strong></p>
+              <ul>
+                <li><strong>API routers:</strong> <code>auth</code>, <code>admin</code>, <code>curriculum</code>, <code>labour_market</code>, <code>skills</code>, <code>analytics</code> and <code>ingestion</code>.</li>
+                <li><strong>Services:</strong> ingestion (including the paginated Adzuna importer with hard bounds), canonical skill mapping, XGBoost alignment on locked labels, baseline (<code>readable-baseline-v1</code>) and LSTM forecast evaluation, recommendation building, and the encrypted backup/restore service with manifest + verification.</li>
+                <li><strong>Semantic matching:</strong> pgvector in PostgreSQL; a healthy state shows <strong>Vector Backend = pgvector</strong>, and unavailability is reported as <em>not ready</em> rather than silently falling back.</li>
+              </ul>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <div class="sd-panel" id="sd-data-model">
+          <details open>
+            <summary>6&period; Data model and provenance</summary>
+            <div class="sd-body">
+              <p>Evidence is stored as checksummed, versioned records traceable to a source file and ingestion job. Provenance runs from source record through canonical mappings, demand evidence, locked training datasets, candidates, active models, recommendations and decision history.</p>
+              <figure class="sd-diagram" id="diagram-e">
+<pre class="mermaid">
+flowchart LR
+    S[Source record] --> J[Ingestion job]
+    J -->|checksum + version| N1[Canonical skill mapping]
+    N1 -->|approved review only| DE2[Demand evidence]
+    J --> DS[Dataset snapshot]
+    DS -->|fingerprint labour-ds-v1-digest16| TR2[Training]
+    TR2 --> C2[Candidate registry]
+    C2 -->|gates pass| M2[Active model]
+    M2 --> R2[Recommendation + evidence dossier]
+    R2 -->|decision + rationale| D2[Decision history and audit log]
+    D2 --> E2[Exportable reports and saved snapshots]
+</pre>
+                <figcaption>Diagram E &mdash; Data lineage from source record to recommendation: checksums, review gates and the immutable candidate registry preserve auditability.</figcaption>
+                <p class="sd-diagram-offline">Requires internet for the Mermaid renderer. If the diagram does not appear, the code block above is the Mermaid source.</p>
+              </figure>
+              <p><strong>Notable artifacts:</strong> <code>labour-ds-v1-&lt;digest16&gt;</code> (fingerprint-locked reviewed-label dataset), <code>readable-baseline-v1</code> (declared baseline model), and the immutable candidate registry entries with their metrics and gate status.</p>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <div class="sd-panel" id="sd-providers">
+          <details open>
+            <summary>8&period; Provider configuration</summary>
+            <div class="sd-body">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Provider</th><th>Configuration</th></tr></thead>
+                  <tbody>
+                    <tr><td><strong>Synthetic job board</strong></td><td>No credentials. Fixture served over <code>FUTURE_SYNTHETIC_JOBS_BASE_URL</code> (loopback) for tests and the model-UAT script. <span class="sd-evidence-class sd-ev-synthetic">synthetic</span></td></tr>
+                    <tr><td><strong>Adzuna API source</strong></td><td>Encrypted credentials (Fernet) written by <code>backend/scripts/configure_adzuna_credentials.py</code> &mdash; never in <code>.env</code> or source. Ingest bounded: <code>PAGE_SIZE_MAX 50</code>, <code>PAGE_NUMBER_MAX 250</code>, <code>MAX_PAGES_PER_RUN 250</code>, <code>CONSECUTIVE_FAILURE_ABORT 3</code>, <code>MAX_RETRIES_PER_PAGE 2</code>, <code>DEFAULT_REQUESTS_PER_MINUTE 30</code>. Written academic research permission received (2026-09-10): <code>permission_status=written_academic_permission</code>, <code>empirical_use_permitted=true</code>, attribution required at <code>https://www.adzuna.co.za</code> (evidence: <code>docs/evidence/adzuna-permission-2026-09-10.md</code>). Identity preserved: <code>ADZUNA_TRIAL_NOT_EMPIRICAL</code> / <code>live_trial_uat</code>; historical pre-permission rows keep their original trial/UAT acquisition metadata. <span class="sd-evidence-class sd-ev-uat">acquisition: technical UAT</span></td></tr>
+                    <tr><td><strong>StatsSA QLFS</strong></td><td>Public document source (no API key); the more quarters/years ingested, the more meaningful the time-indexed demand evidence. <span class="sd-evidence-class sd-ev-public">public evidence</span></td></tr>
+                    <tr><td><strong>CHE VitalStats</strong></td><td>Public higher-education context source; institution-specific CHE/DHET evidence remains pending. <span class="sd-evidence-class sd-ev-deferred">deferred validation</span></td></tr>
+                    <tr><td><strong>CPUT prospectus import</strong></td><td>Intranet/portal import for programme publication pages, alongside direct curriculum PDF upload. <span class="sd-evidence-class sd-ev-public">public evidence</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <div class="sd-panel" id="sd-security">
+          <details open>
+            <summary>12&period; Security and governance</summary>
+            <div class="sd-body">
+              <ul>
+                <li><strong>Transport:</strong> TLS terminated by NGINX (HTTP 8080, HTTPS 8443); the reference deployment sets <code>REQUIRE_HTTPS=true</code> and <code>TRUST_PROXY_HEADERS</code>, and <code>DEBUG=false</code>.</li>
+                <li><strong>Authentication and authorisation:</strong> JWT with issuer and audience (<code>JWT_ISSUER</code>, <code>JWT_AUDIENCE</code>); RBAC enforced server-side; <code>CORS_ORIGINS</code> restricts browser origins.</li>
+                <li><strong>Secrets:</strong> <code>SECRET_KEY</code>, <code>SECRET_PROVIDER</code>, <code>SECRET_ROTATION_OWNER</code> and <code>SECRET_ROTATION_DAYS</code> govern key material; provider credentials are Fernet-encrypted and never stored in <code>.env</code> or source.</li>
+                <li><strong>Separation of duties:</strong> final academic approval is Curriculum-Approver-only; Administrators are excluded by design and cannot bypass it.</li>
+                <li><strong>Audit:</strong> validation notes, mapping decisions, labelling actions, recommendation decisions and rationale are persisted as decision history and audit log.</li>
+                <li><strong>Backups:</strong> encrypted bundles with manifest and verification; restore drills run against an isolated temporary database &mdash; the live database is never a restore target; retention is applied by an administrator.</li>
+              </ul>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <p class="sd-group-title">Testing and troubleshooting</p>
+
+        <div class="sd-panel" id="sd-troubleshooting">
+          <details open>
+            <summary>13&period; Troubleshooting and recovery</summary>
+            <div class="sd-body">
+              <ul>
+                <li><strong>Start with System Operations.</strong> The page summarises <code>/ready</code>, <code>/health</code> and <code>/api/v1/ready</code>, vector backend state, and container status.</li>
+                <li><strong>Vector backend shows not ready?</strong> pgvector is not available in the deployment; this is reported explicitly rather than hidden behind a fallback. Verify the <code>postgres</code> image includes the extension (reference: <code>pgvector/pgvector:pg16</code>).</li>
+                <li><strong>Frontend serving unexpected content?</strong> NGINX serves only <code>./frontend</code> read-only; re-deploy the changed static files to the host path and verify their checksums after transfer.</li>
+                <li><strong>Service logs:</strong> use <code>docker compose logs &lt;service&gt;</code>; the deployment scripts also copy remote logs to <code>/tmp</code> (see the pull/deploy helper) and retain evidence under the backend evidence host path.</li>
+                <li><strong>Stop/start/reset:</strong> <code>stop-docker.sh</code> stops the stack; <code>start-docker.sh</code> restarts it; <code>reset-docker.sh</code> tears down application containers while preserving named volumes. Confirm backups before any reset with data-loss potential.</li>
+                <li><strong>Verify a deploy:</strong> compare SHA-256 of the transferred file against the local copy and confirm the served URL answers HTTP 200 with the expected anchors present.</li>
+              </ul>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <div class="sd-panel" id="sd-testing">
+          <details open>
+            <summary>14&period; Testing</summary>
+            <div class="sd-body">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Test</th><th>What it covers</th><th>Evidence class</th></tr></thead>
+                  <tbody>
+                    <tr><td>Backend test suite (<code>pytest</code>)</td><td>API, services and conventions; combined frontend-syntax and Adzuna-workflow guard suites run green (62 passed, 1 skipped).</td><td><span class="sd-evidence-class sd-ev-uat">technical UAT</span></td></tr>
+                    <tr><td><code>test_frontend_syntax.py</code></td><td>HTML well-formedness, script-tag balance, local CSS references exist; JavaScript syntax checked with <code>node --check</code>.</td><td><span class="sd-evidence-class sd-ev-uat">technical UAT</span></td></tr>
+                    <tr><td><code>test_adzuna_workflow_ui.py</code></td><td>Frontend guards for the Adzuna trial workflow.</td><td><span class="sd-evidence-class sd-ev-uat">technical UAT</span></td></tr>
+                    <tr><td>Model UAT script</td><td><code>run_model_training_readiness_uat.py --seed 42 --size 600</code> proves the model workflow executes on the synthetic provider.</td><td><span class="sd-evidence-class sd-ev-synthetic">synthetic</span></td></tr>
+                    <tr><td>Documentation link/path checks</td><td>Every markdown link resolves and every referenced code path/file exists (last full check: 46/46 links).</td><td><span class="sd-evidence-class sd-ev-uat">technical UAT</span></td></tr>
+                    <tr><td>Promotion gates</td><td><strong>Check Gates</strong> requires genuine automated-test evidence attached to a candidate before promotion is allowed.</td><td><span class="sd-evidence-class sd-ev-uat">technical UAT</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p><strong>Rule:</strong> synthetic outputs and pre-permission trial-UAT rows must never be presented as empirical research findings; report them with their evidence class or not at all. Adzuna outputs acquired under the written academic research permission carry the attribution requirement and may be used for the CPUT academic study with attribution.</p>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <div class="sd-panel" id="sd-limitations">
+          <details open>
+            <summary>15&period; Limitations and deferred work</summary>
+            <div class="sd-body">
+              <ul>
+                <li><span class="sd-evidence-class sd-ev-synthetic">synthetic</span> Synthetic development snapshots execute the workflow but carry no empirical validity.</li>
+                <li><span class="sd-evidence-class sd-ev-uat">acquisition: technical UAT</span> The Adzuna source was acquired as a trial (<code>ADZUNA_TRIAL_NOT_EMPIRICAL</code>, <code>live_trial_uat</code>); written academic research permission (2026-09-10) now applies and <strong>attribution to <code>https://www.adzuna.co.za</code> is required</strong> in thesis, publication, research or examiner packages. Historical pre-permission rows keep their original metadata.</li>
+                <li><span class="sd-evidence-class sd-ev-deferred">deferred validation</span> Institution-specific CHE/DHET evidence is pending until obtained; independent expert validation of model outputs is deferred.</li>
+                <li><span class="sd-evidence-class sd-ev-deferred">regeneration blocked</span> Validated evidence regeneration is currently <strong>blocked</strong> by the <code>no_unreviewed_mappings</code> gate (21 unreviewed skill mappings remain). Forecasts and recommendations were therefore not regenerated. The existing forecast explanations are reconstructed at read time from the current evidence base and clearly flagged <code>provenance_basis=read_time_current_evidence_base</code>; newly generated forecasts will carry an immutable generation-time dossier once regeneration is unblocked. Do <strong>not</strong> bypass the gate to force a green readiness state.</li>
+                <li><span class="sd-evidence-class sd-ev-public">ESCO import accounting</span> The Data Operations &rarr; Skills ESCO panel publishes exact, live per-file imported counts and relation counts for the measured ACA partial subset (checksum/version, linkage coverage). Files whose counts reconcile, files that are short only by within-file duplicate <code>conceptUri</code> rows, and hierarchy/reference files that are not separately countable are each stated plainly; the canonical catalogue remains 23.</li>
+                <li><span class="sd-evidence-class sd-ev-uat">researcher-operated UAT labels</span> The locked reviewed-label dataset used for supervised training is produced by two researcher-operated UAT accounts under the enforced UQ58X relationship. It is <strong>not</strong> independent expert validation and must never be described as such; the replacement path is to operate the separate <code>independent_expert_validation</code> mode with genuine independent experts before any scientific claim or promotion.</li>
+                <li><span class="sd-evidence-class sd-ev-public">source subset</span> The ESCO v1.2.0 bundle supplied for import is an official-format <strong>partial subset</strong> (e.g. skills_en 13,960 rows, occupations_en 3,043 rows); it is not the full published distribution and the canonical FUTURE catalogue remains the curated 23 skills unless an explicit reviewed canonical-promotion operation occurs.</li>
+                <li>Short time series support prototype and development evaluation only. The LSTM requires longer historical sequences; forecasts are always shown beside transparent baseline comparisons and maturity status.</li>
+                <li>The platform never applies changes to a curriculum automatically; it prepares the evidence for qualified human decision-makers.</li>
+              </ul>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+
+        <div class="sd-panel" id="sd-evidence-index">
+          <details open>
+            <summary>16&period; Documentation and evidence index</summary>
+            <div class="sd-body">
+              <p>This page condenses the repository documentation set. The canonical artifacts below are maintained alongside the code and this page should be updated whenever they change.</p>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Artifact</th><th>Location</th></tr></thead>
+                  <tbody>
+                    <tr><td>End-to-end system guide (21 workflows)</td><td><code>docs/system_documentation/END_TO_END_SYSTEM_GUIDE.md</code></td></tr>
+                    <tr><td>Companion reference notes</td><td><code>docs/system_documentation/</code> (deployment, operations, data, quality, model-UAT companions)</td></tr>
+                    <tr><td>Evidence index</td><td><code>docs/evidence/end-to-end-documentation-index.md</code></td></tr>
+                    <tr><td>Live validation evidence (this work)</td><td><code>docs/evidence/final-portal-validation-2026-09-12/</code> (screenshots 13,14,18&ndash;30: XGBoost candidate &amp; registry fingerprint, forecast provenance, alignment quality &amp; locked snapshot, portal approve/reject/modify decision stages with the Curriculum Approver, approved dossier + Decision audit detail, OFO breakdown with counts, ESCO import accounting; plus the 11-row snapshot CSV/JSON, XGBoost candidate metrics JSON and recommendation dossier report JSON/CSV. Invalid first-pass captures are quarantined in <code>failed-captures/</code> with a README.)</td></tr>
+                    <tr><td>Help Manual (task card)</td><td>Portal: <code>help-manual.html</code>, cross-linked from this view</td></tr>
+                    <tr><td>Project status record</td><td><code>OPENCODE_STATUS.md</code>, <code>OPENCODE_FINAL_CHECKLIST.md</code></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p><strong>Evidence-class legend:</strong> <span class="sd-evidence-class sd-ev-uat">technical UAT</span> operator-run reproducibility &middot; <span class="sd-evidence-class sd-ev-synthetic">synthetic</span> simulated offline data &middot; <span class="sd-evidence-class sd-ev-public">public evidence</span> official sources with provenance &middot; <span class="sd-evidence-class sd-ev-deferred">deferred validation</span> expert/institutional validation still pending.</p>
+              <a class="sd-backtotop" href="#sd-toc">&uarr; Back to contents</a>
+            </div>
+          </details>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  
+  <script type="module">
+    import { initPage } from './shared-nav.js';
+    initPage('executive');
+  </script>
+  <script type="module" src="dashboard-main.js?v=20260912d"></script>
+  <script>
+    (function() {
+      var token = localStorage.getItem('access_token');
+      if (!token) return;
+      fetch('/api/v1/auth/me', { headers: { 'Authorization': 'Bearer ' + token } })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(user) {
+          if (user && (user.is_admin || (user.roles || []).some(function(r) { return r.toLowerCase() === 'admin' || r.toLowerCase() === 'administrator'; }))) {
+            var el = document.getElementById('adminLink');
+            if (el) el.style.display = 'block';
+          }
+        })
+        .catch(function() {});
+    })();
+  </script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, securityLevel: 'loose', theme: 'neutral' });
+  </script>
+  <!-- Gap Evidence Drill-down: decision-facing evidence trace for skill gaps. -->
+</body>
+</html>
+
+
+
+
+

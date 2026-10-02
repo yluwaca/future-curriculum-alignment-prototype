@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FUTURE Platform â€” User Guide</title>
+  <link rel="stylesheet" href="user-guide.css">
+  <style>.session-label{color:#56677b;font-size:13px}.hidden{display:none!important}</style>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css?v=20260824a">\n</head>
+<body>
+  <a class="skip-link" href="#guide-content">Skip to guide</a>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="FUTURE Platform sign in"><span aria-hidden="true">F</span> FUTURE</a>
+    <nav aria-label="Account links">
+      <span id="guideSessionLabel" class="session-label hidden"></span>
+      <a href="register.html" id="guideRequestAccess">Request access</a>
+      <a class="primary-link" href="index.html" id="guideAccountLink">Sign in</a>
+    </nav>
+  </header>
+
+  <main id="guide-content">
+    <section class="hero">
+      <p class="eyebrow">Getting started</p>
+      <h1>FUTURE Platform User Guide</h1>
+      <p class="lead">A practical introduction to accessing the platform, choosing the right workspace, and interpreting its evidence responsibly.</p>
+      <div class="guide-actions"><a class="button" href="#first-steps">Start here</a><a class="text-link" href="#workspaces">Explore the workspaces</a></div>
+    </section>
+
+    <section class="notice" aria-labelledby="decision-support-title">
+      <div aria-hidden="true">i</div>
+      <div><h2 id="decision-support-title">Decision support, with people in control</h2><p>FUTURE brings evidence together for review. It does not make automatic curriculum decisions. Qualified staff remain responsible for interpretation, approval, and action.</p></div>
+    </section>
+
+    <div class="guide-layout">
+      <aside aria-label="On this page">
+        <strong>On this page</strong>
+        <a href="#purpose">What FUTURE does</a>
+        <a href="#first-steps">Your first steps</a>
+        <a href="#workspaces">Choose a workspace</a>
+        <a href="#evidence">Reading the evidence</a>
+        <a href="#common-tasks">Common tasks</a>
+        <a href="#help">Help and access</a>
+      </aside>
+
+      <div class="content">
+        <section id="purpose">
+          <p class="section-number">01</p>
+          <h2>What FUTURE does</h2>
+          <p>The platform compares curriculum evidence with labour-market evidence to help staff investigate skill alignment, demand signals, and governed recommendations.</p>
+          <div class="three-up">
+            <article><h3>Bring evidence together</h3><p>View traceable curriculum, skills, and labour-market information in one place.</p></article>
+            <article><h3>Support analysis</h3><p>Explore alignment results, gaps, forecasts, and the evidence behind them.</p></article>
+            <article><h3>Record decisions</h3><p>Review recommendations through role-based, auditable human workflows.</p></article>
+          </div>
+        </section>
+
+        <section id="first-steps">
+          <p class="section-number">02</p>
+          <h2>Your first steps</h2>
+          <ol class="steps">
+            <li><span>1</span><div><h3>Request access</h3><p>Submit an account request. An administrator must approve it and assign the appropriate role.</p></div></li>
+            <li><span>2</span><div><h3>Sign in</h3><p>Use your approved username or email and password. The pages you can access depend on your role.</p></div></li>
+            <li><span>3</span><div><h3>Start in the Decision Portal</h3><p>Review the available evidence and check dates, sources, coverage, and limitations before interpreting any result.</p></div></li>
+          </ol>
+        </section>
+
+        <section id="workspaces">
+          <p class="section-number">03</p>
+          <h2>Choose the right workspace</h2>
+          <p>You will only see areas authorised for your role.</p>
+          <div class="workspace-grid">
+            <article><p class="role">Approved users</p><h3>Decision Portal</h3><p>View curriculum evidence, skill alignment, forecasts, reports, and recommendation status.</p></article>
+            <article><p class="role">Analyst Â· Data scientist Â· Admin</p><h3>Data Operations</h3><p>Ingest approved sources, monitor processing, address quality issues, and review pipeline results.</p></article>
+            <article><p class="role">Data scientist Â· Admin</p><h3>Model Lab</h3><p>Manage labelled evidence, train candidate models, inspect validation results, and submit lifecycle decisions.</p></article>
+            <article><p class="role">Admin</p><h3>System Operations</h3><p>Check service readiness, backups, deployment evidence, and operational health.</p></article>
+            <article><p class="role">Admin</p><h3>User Admin</h3><p>Approve access requests, assign roles, and manage accounts.</p></article>
+          </div>
+        </section>
+
+        <section id="evidence">
+          <p class="section-number">04</p>
+          <h2>Read the evidence responsibly</h2>
+          <ul class="checks">
+            <li><strong>Check provenance.</strong> Confirm the source, collection period, programme, and document version.</li>
+            <li><strong>Check coverage.</strong> A missing skill may reflect incomplete evidence rather than a curriculum deficiency.</li>
+            <li><strong>Treat forecasts as uncertain.</strong> Projections are planning evidence, not guaranteed outcomes.</li>
+            <li><strong>Distinguish candidate from active models.</strong> Training does not make a model active; validation and authorised promotion are required.</li>
+            <li><strong>Keep humans accountable.</strong> Recommendations require expert interpretation and governance review.</li>
+          </ul>
+        </section>
+
+        <section id="common-tasks">
+          <p class="section-number">05</p>
+          <h2>Common tasks</h2>
+          <details><summary>How do I review a recommendation?</summary><p>Open Recommendation Review from the portal, inspect its supporting evidence and explanation, then record the permitted review action and rationale. Do not approve a recommendation only because it has a high score.</p></details>
+          <details><summary>How do I add new data?</summary><p>If your role permits it, use Data Operations. Select the correct source type, provide the required source information, run the quality checks, and resolve flagged issues before using the result.</p></details>
+          <details><summary>How do I work with a model?</summary><p>Use Model Lab to prepare labelled evidence and create a candidate. Review its dataset fingerprint, validation evidence, limitations, and comparison with the active model before any promotion decision.</p></details>
+          <details><summary>Why can I not see an area?</summary><p>Your assigned role may not permit access. Contact the platform administrator if your responsibilities have changed.</p></details>
+        </section>
+
+        <section id="help" class="help-card">
+          <div><p class="section-number">06</p><h2>Need help or access?</h2><p>For account approval, role changes, source authorisation, or unexpected results, contact your FUTURE Platform administrator. Include the page, what you attempted, and any message displayedâ€”but never send your password.</p></div>
+          <a class="button" href="index.html">Return to sign in</a>
+        </section>
+      </div>
+    </div>
+  </main>
+  <footer><p>FUTURE Platform Â· Curriculumâ€“Labour Market Alignment</p><a href="index.html">Sign in</a></footer>
+  <script type="module" src="user-guide.js"></script>
+</body>
+</html>

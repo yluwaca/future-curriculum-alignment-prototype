@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "fixture_id": "pclmas-public-synthetic-demo-v1",
+  "classification": "synthetic_demo_only",
+  "empirical_evidence": false,
+  "contains_personal_information": false,
+  "rights_status": "project-authored-public-demo",
+  "licence": "CC0-1.0",
+  "acquisition_date": "2026-08-31",
+  "evidence_cutoff": "2026-03-05",
+  "provenance": "Fictional records authored for deterministic software smoke testing; no real people, vacancies, employers, curriculum records, or research observations.",
+  "prohibited_uses": [
+    "scientific evaluation",
+    "model performance claims",
+    "labour-market claims",
+    "curriculum or employability claims"
+  ],
+  "files": [
+    "synthetic_curriculum_demo.txt",
+    "synthetic_vacancies_demo.csv"
+  ]
+}

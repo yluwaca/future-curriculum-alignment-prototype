@@ -1,0 +1,12 @@
+server {
+    listen 8080;
+    server_name _;
+    client_max_body_size 25m;
+    root __DEPLOY_ROOT__/frontend;
+
+    location = /health { return 200 "ok\n"; add_header Content-Type text/plain; }
+    location = /ready { proxy_pass http://127.0.0.1:8000/ready; }
+    location /api/ { proxy_pass http://127.0.0.1:8000; proxy_set_header Host $host; proxy_set_header X-Forwarded-Proto $scheme; }
+    location / { try_files $uri $uri/ /index.html; }
+}
+

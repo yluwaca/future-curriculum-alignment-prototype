@@ -1,0 +1,4 @@
+job_id,job_title,location,posted_date,description,skills
+DEMO-JOB-001,Junior Data Assistant,Cape Town Western Cape,2026-01-05,"SYNTHETIC fictional vacancy used only for software demonstration. Clean sample data and prepare simple reports.","Python; SQL; Git"
+DEMO-JOB-002,Junior Application Support Technician,Bellville Western Cape,2026-02-05,"SYNTHETIC fictional vacancy used only for software demonstration. Support containerised applications and document incidents.","Docker; Linux; Git"
+DEMO-JOB-003,Entry-level Reporting Assistant,Cape Town Western Cape,2026-03-05,"SYNTHETIC fictional vacancy used only for software demonstration. Build basic dashboards from relational data.","SQL; data visualisation; Python"

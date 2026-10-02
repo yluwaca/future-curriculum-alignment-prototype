@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FUTURE Platform - User Administration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css?v=20260824a">\n</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>FUTURE</h1>
+        <p>User Administration</p>
+      </div>
+      <nav class="nav">
+        <a href="dashboard.html">Back to Dashboard</a>
+        <a href="help-manual.html">Help Manual</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h2>User Administration</h2>
+          <p>Manage user registrations, approvals, and role assignments.</p>
+        </div>
+        <div class="userbox">
+          <div class="usertext">
+            <strong id="userName">Loading</strong>
+            <span id="userEmail">Loading</span>
+          </div>
+          <button class="btn" id="refreshBtn">Refresh</button>
+          <button class="btn danger" id="logoutBtn">Logout</button>
+        </div>
+      </header>
+
+      <div id="statusBox" class="status">Loading users...</div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="pending">Pending <span id="pendingCount" class="badge warn">0</span></button>
+        <button class="tab" data-tab="approved">Approved <span id="approvedCount" class="badge good">0</span></button>
+        <button class="tab" data-tab="rejected">Rejected <span id="rejectedCount" class="badge bad">0</span></button>
+        <button class="tab" data-tab="all">All Users</button>
+      </div>
+
+      <div class="search-bar">
+        <input id="searchInput" placeholder="Search by username or email...">
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Roles</th>
+              <th>Registered</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="pagination" class="pagination"></div>
+    </main>
+  </div>
+
+  <!-- Approve Modal -->
+  <div id="approveModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>Approve User</h3>
+      <p id="approveUserInfo"></p>
+      <label>Default Role</label>
+      <select id="approveRole">
+        <option value="">Loading available roles...</option>
+      </select>
+      <label>Notes (optional)</label>
+      <textarea id="approveNotes" rows="2" placeholder="Optional approval notes..."></textarea>
+      <div class="modal-actions">
+        <button class="btn" id="approveCancelBtn">Cancel</button>
+        <button class="btn primary" id="approveConfirmBtn">Approve</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reject Modal -->
+  <div id="rejectModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>Reject User</h3>
+      <p id="rejectUserInfo"></p>
+      <label>Rejection Reason *</label>
+      <textarea id="rejectReason" rows="3" placeholder="Explain why this registration is being rejected..."></textarea>
+      <div class="modal-actions">
+        <button class="btn" id="rejectCancelBtn">Cancel</button>
+        <button class="btn danger" id="rejectConfirmBtn">Reject</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Roles Modal -->
+  <div id="rolesModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>Manage Roles</h3>
+      <p id="rolesUserInfo"></p>
+      <div id="rolesCheckboxes"></div>
+      <div class="modal-actions">
+        <button class="btn" id="rolesCancelBtn">Cancel</button>
+        <button class="btn primary" id="rolesConfirmBtn">Save Roles</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Password Modal -->
+  <div id="resetPasswordModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>Reset User Password</h3>
+      <p id="resetPasswordInfo"></p>
+      <label>New Password</label>
+      <input type="password" id="resetNewPassword" placeholder="Enter new password (min 8 chars)" autocomplete="new-password">
+      <div class="modal-actions">
+        <button class="btn" id="resetPasswordCancelBtn">Cancel</button>
+        <button class="btn primary" id="resetPasswordConfirmBtn">Reset Password</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

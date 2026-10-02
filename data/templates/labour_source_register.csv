@@ -1,0 +1,2 @@
+source_id,source_name,edition_or_api_version,geography,coverage_start,coverage_end,acquired_at,access_method,rights_status,citation,sha256,storage_reference
+SRC-LAB-010,Adzuna jobs API (South Africa),API v1 search endpoint jobs/za/search/1,South Africa (za); diagnostic where=Cape Town,NOT_VERIFIED,NOT_VERIFIED,2026-09-07,"HTTPS REST GET with app_id/app_key; one-request diagnostic; no scraping",provisional_licensed_no_ingestion,https://api.adzuna.com/v1/api/jobs/za/search/1,NOT_APPLICABLE,NOT_STORED

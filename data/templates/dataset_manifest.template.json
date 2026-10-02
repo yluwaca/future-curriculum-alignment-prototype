@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "status": "unpopulated_template",
+  "snapshot_id": null,
+  "created_utc": null,
+  "custodian": null,
+  "ethics_reference": null,
+  "rights_register_sha256": null,
+  "source_files": [],
+  "canonical_files": [],
+  "eligibility_policy_version": null,
+  "label_basis_counts": {},
+  "class_balance": {},
+  "time_coverage": {},
+  "split_policy": null,
+  "split_membership_sha256": null,
+  "dataset_sha256": null,
+  "contains_empirical_data": false,
+  "public_redistribution_allowed": false
+}

@@ -1,0 +1,45 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+!.env.production.example
+!.env.*.example
+*.pem
+*.key
+
+# Runtime data and controlled evidence
+data/locked/*
+!data/locked/README.md
+examiner-package/
+backend/data/
+backend/models/
+backend/output/
+backend/logs/
+logs/
+models/
+*.db
+*.sqlite*
+*.dump
+*.backup
+
+# Environments, caches and generated files
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.test_tmp/
+node_modules/
+dist/
+build/
+
+# Generated archives and document evidence
+*.zip
+*.7z
+*.tar
+*.gz
+*.pdf
+*.doc
+*.docx
+*.xlsx
+

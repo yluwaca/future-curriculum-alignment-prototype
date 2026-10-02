@@ -1,0 +1,603 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FUTURE Platform — Help Manual</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css?v=20260910a">
+  <link rel="stylesheet" href="help-manual.css?v=20260910a">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css?v=20260824a">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar"></aside>
+    <main class="main">
+      <header class="topbar">
+        <div><h2 id="pageTitle">Help Manual</h2><p id="pageSubtitle">Step-by-step instructions for completing tasks in your authorised workspace.</p></div>
+        <div class="userbox">
+          <div class="usertext"><strong id="userName">Loading</strong><span id="userEmail"></span></div>
+          <a class="btn primary" href="dashboard.html">Return to Decision Portal</a>
+          <button class="btn danger" id="logoutBtn">Logout</button>
+        </div>
+      </header>
+
+      <section class="manual-hero">
+        <div>
+          <p class="eyebrow">Signed-in help</p>
+          <h1>What would you like to do?</h1>
+          <p>Choose a task below. The manual explains where to go, what to check, and what a successful result looks like.</p>
+          <p><strong>Operationally verified:</strong> 1 October 2026. The documented path covers source ingestion, mapping review, alignment labelling, dataset locking, model evaluation, governed recommendations, decision audit and committee PDF export.</p>
+        </div>
+        <label class="manual-search">Find a task
+          <input id="manualSearch" type="search" placeholder="For example: approve a user, upload data, review a recommendation">
+        </label>
+      </section>
+
+      <section class="first-login" aria-labelledby="first-login-title">
+        <div class="step-number">1</div>
+        <div><h2 id="first-login-title">Newly approved? Start here</h2><p>Confirm your name and role, open the Decision Portal, and check which workspaces appear in the left menu. Missing pages usually mean your role does not include that responsibility.</p></div>
+        <a href="#task-orientation">View first-login checklist</a>
+      </section>
+
+      <section class="role-guide" aria-labelledby="role-guide-title">
+        <div class="role-guide-heading">
+          <p class="eyebrow">Know your responsibility</p>
+          <h2 id="role-guide-title">What your role is for</h2>
+          <p>Each role sees only the workspaces and actions needed for its responsibilities. Having access to evidence does not transfer final curriculum authority to the platform.</p>
+        </div>
+        <div class="role-guide-grid">
+          <article class="role-guide-card" id="viewer-role">
+            <p class="task-role">Viewer</p>
+            <h3>Understand published evidence and decisions</h3>
+            <p>A Viewer is a read-only decision user, such as a curriculum planner, manager, committee member, or invited stakeholder. The purpose of this role is to inspect trusted results without changing source data, models, or governance records.</p>
+            <h4>A Viewer can</h4>
+            <ul>
+              <li>Inspect curriculum evidence, reviewed skills alignment, published demand outlooks, and decision history.</li>
+              <li>Open published recommendations and trace their evidence, confidence, limitations, and status.</li>
+              <li>Search, filter, and export the reports made available to decision users.</li>
+            </ul>
+            <h4>A Viewer cannot</h4>
+            <p>Ingest or process data, create mappings, train or promote models, approve recommendations, administer users, or operate the system.</p>
+          </article>
+          <article class="role-guide-card" id="analyst-role">
+            <p class="task-role">Analyst</p>
+            <h3>Prepare and quality-check decision evidence</h3>
+            <p>An Analyst combines the read access of a Viewer with controlled access to Data Operations. The purpose of this role is to turn approved source material into traceable, quality-checked evidence for human and governance review.</p>
+            <h4>An Analyst can</h4>
+            <ul>
+              <li>Use every decision page available to a Viewer.</li>
+              <li>Ingest authorised curriculum and labour-market sources, monitor jobs, normalise records, and investigate quality failures.</li>
+              <li>Generate and review mapping or alignment tasks, apply the agreed labelling rubric, and document evidence-based findings.</li>
+              <li>Run approved processing and regeneration steps, then verify that outputs are complete before review.</li>
+              <li>Open saved evidence snapshots to inspect what a quality or readiness report captured at a particular time.</li>
+            </ul>
+            <h4>An Analyst cannot</h4>
+            <p>Train, promote, reject, or roll back models; edit versioned normalisation code in the portal; change system configuration; manage users; or treat an analytical result as a final curriculum decision.</p>
+          </article>
+          <article class="role-guide-card" id="data-scientist-role">
+            <p class="task-role">Data Scientist</p>
+            <h3>Develop and validate governed model candidates</h3>
+            <p>A Data Scientist combines decision evidence, Data Operations, and Model Lab access. The purpose of this role is to prepare reproducible datasets, train candidate models, test them against declared baselines, and document whether the technical evidence passes the declared gates.</p>
+            <h4>A Data Scientist can</h4>
+            <ul>
+              <li>Inspect all decision evidence, reports, recommendations, limitations, and history.</li>
+              <li>Use Data Operations, perform independent evidence reviews, resolve mappings, and lock an eligible reviewed dataset.</li>
+              <li>Create dataset snapshots, start candidate-only training, monitor durable jobs, and inspect the model registry.</li>
+              <li>Record automated test evidence, evaluate promotion gates, document limitations and fairness evidence, and reject an unsuitable candidate.</li>
+              <li>Use Model Lab to resolve dataset, evaluation, and model-quality gaps. Operational preparation tasks are kept off the curriculum decision-support pages.</li>
+            </ul>
+            <h4>A Data Scientist cannot</h4>
+            <p>Approve or activate a model, roll back the active model, operate backups or deployments, administer users, bypass evidence gates, or directly edit versioned normalisation code. Administrator approval separates model development from production activation.</p>
+          </article>
+          <article class="role-guide-card" id="approver-role">
+            <p class="task-role">Curriculum Approver</p>
+            <h3>Hold final academic authority over recommendations</h3>
+            <p>A Curriculum Approver is a senior academic or governance delegate with exclusive authority to give the final academic approval on curriculum recommendations. This responsibility cannot be exercised by any other role &mdash; including Administrators &mdash; and that separation is enforced by the server.</p>
+            <h4>A Curriculum Approver can</h4>
+            <ul>
+              <li>Inspect every recommendation dossier: evidence, confidence, explanations, forecasts and decision history.</li>
+              <li>Record approve, reject or modify decisions with an evidence-based rationale.</li>
+              <li>Give the <strong>final academic approval</strong> that closes a recommendation's governance cycle.</li>
+              <li>Generate the immutable committee evidence pack and download its PDF after the readiness gates pass.</li>
+            </ul>
+            <h4>A Curriculum Approver cannot</h4>
+            <p>Ingest or process data, train models, administer users, or change system operations. The role carries decision authority, not operational access.</p>
+          </article>
+          <article class="role-guide-card" id="administrator-role">
+            <p class="task-role">Administrator</p>
+            <h3>Govern access, activation, and operational continuity</h3>
+            <p>An Administrator is the platform’s operational and access custodian. The role exists to keep the service secure, available, recoverable, and auditable while preserving separation between model development, activation, and curriculum authority.</p>
+            <h4>An Administrator can</h4>
+            <ul>
+              <li>Use all decision, data, and model workspaces and inspect their audit evidence.</li>
+              <li>Approve or reject access requests, assign least-privileged roles, reset passwords, and review account status.</li>
+              <li>Independently approve and promote an eligible model candidate, verify serving continuity, and perform a documented rollback.</li>
+              <li>Run readiness, backup, restoration, deployment, service-health, and UAT checks from System Operations.</li>
+              <li>Investigate failures and preserve evidence showing who performed an operational action and when.</li>
+            </ul>
+            <h4>An Administrator cannot</h4>
+            <p>Bypass dataset, validation, promotion, or audit gates; treat system access as curriculum approval authority; silently alter production evidence; or promote a model merely because training completed. High-impact actions require independent evidence and a recorded reason.</p>
+          </article>
+        </div>
+      </section>
+
+      <nav class="manual-filters" aria-label="Filter help tasks">
+        <button class="active" data-manual-filter="all">All tasks</button>
+        <button data-manual-filter="viewer">Decision users</button>
+        <button data-manual-filter="analyst">Analysts</button>
+        <button data-manual-filter="data_scientist">Data scientists</button>
+        <button data-manual-filter="curriculum_approver">Curriculum Approvers</button>
+        <button data-manual-filter="admin">Administrators</button>
+      </nav>
+
+      <section aria-labelledby="quick-start-title">
+        <div class="role-guide-heading">
+          <p class="eyebrow">Start in minutes</p>
+          <h2 id="quick-start-title">Quick-start guides</h2>
+          <p>The most common journeys, with the exact screens and confirmation cues to expect along the way.</p>
+        </div>
+        <div class="manual-grid">
+          <article class="task-card" id="quickstart-account" data-roles="viewer analyst data_scientist curriculum_approver admin" data-search="request account access approval sign in register new user first time quick start">
+            <p class="task-role">Everyone</p><h2>Request an account and get approved</h2>
+            <ol>
+              <li>Open the platform URL. The landing page (<strong>index.html</strong>) shows a sign-in form and a <strong>Request access</strong> link.</li>
+              <li>Select <strong>Request access</strong>, complete the registration form (name, email, motivation) and submit it.</li>
+              <li>You will see an on-screen confirmation that your request was submitted. Nothing else happens until an administrator approves it &mdash; this is deliberate.</li>
+              <li>An administrator reviews your request under <strong>User Admin &rarr; Pending</strong>, verifies your identity and assigns the least-privileged suitable role.</li>
+              <li>Once approved, sign in on the landing page with your email and password.</li>
+            </ol>
+            <p class="result"><strong>You'll know it worked when:</strong> the Decision Portal opens, your name appears in the top bar, and the left menu shows exactly the workspaces for your role (missing pages usually mean your role does not include them).</p>
+            <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-roles">Section 2 &middot; Intended users and RBAC roles</a></p>
+          </article>
+
+          <article class="task-card" id="quickstart-ingest" data-roles="analyst data_scientist admin" data-search="upload ingest curriculum pdf job posting csv data operations import source quick start">
+            <p class="task-role">Analyst · Data scientist · Admin</p><h2>Upload and ingest new data</h2>
+            <ol>
+              <li>Open <strong>Data Operations</strong> from the sidebar.</li>
+              <li>For curriculum: use the <strong>Curriculum Documents</strong> upload panel; for jobs: use the job-advert dataset upload (CSV/XLSX).</li>
+              <li>Select the file, confirm the source classification and provenance fields, then start the upload.</li>
+              <li>A success toast confirms receipt; an entry appears under <strong>Ingestion Jobs</strong> with status <em>Pending</em> or <em>Running</em>.</li>
+              <li>Watch the job row until it shows <strong>Completed</strong> with processed/record counts. Raw records keep checksums automatically &mdash; no extra action is needed.</li>
+              <li>If the job ends <em>Failed</em>, open its failure detail before retrying (see FAQ below).</li>
+            </ol>
+            <p class="result"><strong>You'll know it worked when:</strong> the ingestion job row reads Completed with non-zero record counts, and the new documents/postings appear in Curriculum Evidence or Skills Alignment after processing.</p>
+            <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-operate">Section 7 &middot; End-to-end operating procedure</a></p>
+          </article>
+
+          <article class="task-card" id="quickstart-processing" data-roles="analyst data_scientist admin" data-search="processing pipeline run alignment forecast recommendation regenerate stage monitor data operations quick start">
+            <p class="task-role">Analyst · Data scientist · Admin</p><h2>Trigger the processing pipeline</h2>
+            <ol>
+              <li>In <strong>Data Operations</strong>, find the <strong>Processing</strong> panel.</li>
+              <li>Choose the scope: a full run, or alignment-only / forecast-only / recommendations-only if you only need one part regenerated.</li>
+              <li>Select <strong>Run</strong>. The stage monitor lists each stage as it progresses: queued &rarr; running &rarr; completed.</li>
+              <li>Wait for all stages to complete &mdash; do not close the page mid-run; the pipeline run keeps its own status either way.</li>
+              <li>Return to the dashboards and refresh to see updated alignment scores, gap summaries and forecasts.</li>
+            </ol>
+            <p class="result"><strong>You'll know it worked when:</strong> a new pipeline-run entry exists with a completion timestamp and no failed stages, and dashboard metrics change after refresh.</p>
+            <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-operate">Section 7 &middot; End-to-end operating procedure</a></p>
+          </article>
+
+          <article class="task-card" id="quickstart-approver" data-roles="curriculum_approver analyst admin" data-search="review approve reject modify recommendation curriculum approver academic approval rationale dossier quick start">
+            <p class="task-role">Curriculum Approver (final authority)</p><h2>Review, approve or reject a recommendation</h2>
+            <ol>
+              <li>Open <strong>Recommendations</strong>. Filter by status or priority to find items awaiting decision.</li>
+              <li>Select a recommendation to open its <strong>dossier</strong>: curriculum evidence, labour-market evidence, current-jobs evidence, confidence, SHAP explanation and prior decisions.</li>
+              <li>Check three things before deciding: Is the evidence recent and from credible sources? Does the explanation make sense? Are limitations acceptable?</li>
+              <li>Choose <strong>Approve</strong>, <strong>Reject</strong>, or <strong>Modify</strong> (edit content, then resubmit). A written rationale is required &mdash; it becomes part of the audit trail.</li>
+              <li>Zero-evidence items are shown as <strong>non-actionable</strong> with a reason: you may reject them but the Approve control is blocked (and the server refuses approval) until evidence generation re-supports them. They are retained, never silently deleted.</li>
+              <li>For final academic approval, confirm as the Curriculum Approver. Only accounts with this role see that control; administrators deliberately cannot perform it.</li>
+              <li>Verify the decision appears in <strong>Decision History</strong> with your name, role, rationale, timestamp, the before/after status and the evidence-context fingerprint, and that the same chain appears in the JSON/CSV/PDF report exports.</li>
+            </ol>
+            <p class="caution"><strong>Remember:</strong> approving accepts the recommendation into governance record &mdash; interpret evidence yourself rather than relying on scores alone.</p>
+            <p class="result"><strong>You'll know it worked when:</strong> the recommendation's status updates immediately and the decision, author and rationale are visible in Decision History.</p>
+            <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-recommendations">Section 11 &middot; Recommendation and decision support</a></p>
+          </article>
+          <article class="task-card" id="quickstart-end-to-end-model" data-roles="analyst data_scientist curriculum_approver admin" data-search="end to end operate model lock dataset xgboost train evaluate recommendations decision history committee evidence pack pdf">
+            <p class="task-role">Analyst / Data Scientist / Curriculum Approver / Admin</p><h2>Operate the complete model-to-decision workflow</h2>
+            <ol>
+              <li><strong>Prepare evidence:</strong> in <strong>Data Operations</strong>, complete curriculum validation and the Labour sequence: Import vacancies &rarr; Process skills &rarr; Review mappings &rarr; Generate demand. Confirm that only approved mappings contribute to demand evidence.</li>
+              <li><strong>Create reviewed labels:</strong> open <strong>Data Operations &rarr; General &rarr; Review</strong>, generate alignment tasks, record the displayed curriculum-to-demand label and justification, resolve any disagreement, and confirm the queue and class counts.</li>
+              <li><strong>Lock the dataset:</strong> create a reviewed-label snapshot. Record its row count, class distribution, manifest and SHA-256 fingerprint. A large labour-mapping count is not the training-row count: one locked row represents one reviewed curriculum-demand alignment example.</li>
+              <li><strong>Train and evaluate:</strong> open <strong>Model Lab</strong>, select the locked snapshot, start XGBoost training, and inspect chronological/grouped folds, the non-leaking baseline, class balance, calibration, explainability and stability gates.</li>
+              <li><strong>Respect the gates:</strong> retain a failed candidate and its metrics for technical evidence. Do not promote it merely because training completed. Promotion is optional and occurs only when every required gate passes.</li>
+              <li><strong>Generate decision support:</strong> regenerate alignment, forecast and recommendation outputs using the eligible method shown in the dossier. Confirm the displayed model/method identity; do not describe a recommendation as XGBoost-generated unless the dossier says so.</li>
+              <li><strong>Review and audit:</strong> in <strong>Recommendations</strong>, inspect the complete evidence dossier, record approve/reject/modify with a reason, and verify reviewer, role, timestamp, status transition and evidence fingerprint in <strong>Decision History</strong>.</li>
+              <li><strong>Export the final pack:</strong> when all four committee-readiness checks show <strong>ready</strong>, select <strong>Generate committee evidence pack</strong>. Keep the displayed report ID, payload SHA-256 and downloaded PDF with the examiner evidence.</li>
+            </ol>
+            <p class="caution"><strong>Current model result:</strong> the latest reviewed snapshot contains 993 rows but only 40 positive examples (4.03%). Worst chronological-fold F1 is 0, mean chronological-fold F1 is 0.0192 and ECE is 0.1184. The candidate proves the governed training/evaluation mechanism, but promotion remains blocked. Current audited recommendations identify their actual method as <code>canonical_signal_weighted_baseline_v2</code>.</p>
+            <p class="result"><strong>Complete when:</strong> the locked dataset, candidate metrics, gate result, recommendation decisions, Decision History and immutable committee PDF can all be traced by identifiers and hashes.</p>
+            <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-model-training">Section 10 &middot; Model training and evaluation</a> and <a href="dashboard.html?view=systemDocumentation#sd-recommendations">Section 11 &middot; Recommendation and decision support</a></p>
+          </article>
+          <article class="task-card" data-roles="viewer analyst data_scientist admin" data-search="taxonomy provenance OFO ESCO breakdown lineage forecast dossier fingerprint source date explanation">
+            <p class="task-role">Analyst / Data Scientist</p><h2>Check taxonomy provenance and forecast provenance</h2>
+            <ol>
+              <li>Open <strong>Data Operations &rarr; DHET OFO</strong>. Use <strong>Refresh Breakdown</strong> to see the auditable OFO reference-table breakdown: rows counted by code length and by the acquisition that wrote them, each summing exactly to the displayed total (never a bare claim such as "1,511 + 5").</li>
+              <li>Confirm the ESCO import status shows source, version, EUPL licence, imported counts, linkage coverage and the run checksum, and that the canonical catalogue remains the curated 23 skills (the ACA bundle is an official-format partial subset).</li>
+              <li>Open any forecast's <strong>Explanation</strong> to read the source/provenance dossier: query/source, ingestion job IDs, observation date range, record counts, deduplication rule, dataset and explanation fingerprints, method, baselines, uncertainty and known limitations.</li>
+            </ol>
+            <p class="caution"><strong>Remember:</strong> a legacy forecast's dossier is flagged as a read-time current-evidence-base view; newer forecasts carry an immutable generation-time dossier. Validated regeneration is currently blocked by the <code>no_unreviewed_mappings</code> gate (21 unreviewed mappings) &mdash; that is a documented limitation, so do not bypass it to force a green readiness state.</p>
+            <p class="result"><strong>Complete when:</strong> the OFO breakdown reconciles, the canonical count is unchanged, and the forecast dossier shows its fingerprint and source dates.</p>
+            <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-limitations">Section 15 &middot; Limitations and deferred work</a></p>
+          </article>
+        </div>
+      </section>
+
+      <div class="manual-grid" id="manualGrid">
+        <article class="task-card" id="task-orientation" data-roles="viewer analyst data_scientist admin" data-search="first login orientation role menu password decision portal">
+          <p class="task-role">Everyone</p><h2>Complete your first-login check</h2>
+          <ol><li>Confirm your username and email in the page header.</li><li>Review the left menu and note the workspaces available to you.</li><li>Open the Decision Portal and review the dates and source coverage shown.</li><li>Open this Help Manual again whenever you need a procedure.</li></ol>
+          <p class="result"><strong>Complete when:</strong> your identity is correct and you can open every workspace required for your role.</p>
+          <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-roles">Section 2 &middot; Intended users and RBAC roles</a></p>
+        </article>
+
+        <article class="task-card" data-roles="viewer analyst data_scientist admin" data-search="system documentation guide workflow end to end evidence index read explain lineage diagram">
+          <p class="task-role">Everyone</p><h2>Read the end-to-end system guide</h2>
+          <ol><li>Open <strong>Decision Portal &rarr; System Documentation</strong> to reach the full guide.</li><li>Read the two overview diagrams first (workflow flow and evidence lineage).</li><li>Use the guide's 21 numbered workflows when you need the purpose, role, portal location, inputs, action sequence, expected result, audit evidence, and recovery for any task.</li><li>Open the Evidence Index for the batch of UAT documents and captured artifacts that prove each workflow.</li></ol>
+          <p class="caution"><strong>Evidence classes:</strong> the guide keeps four classes apart &mdash; technical UAT (operator-run reproducibility tests), synthetic (simulated offline data), public evidence (official sources with provenance), and expert/institutional validation that is still pending. Never quote the first two as empirical findings.</p>
+          <p class="result"><strong>Complete when:</strong> you know where each workflow is documented and which evidence class supports it.</p>
+          <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-evidence-index">Section 16 &middot; Documentation and evidence index</a></p>
+        </article>
+
+        <article class="task-card" data-roles="viewer analyst data_scientist admin" data-search="inspect recommendation evidence confidence history governance">
+          <p class="task-role">Everyone</p><h2>Inspect a recommendation</h2>
+          <ol><li>Open <strong>Recommendations</strong>.</li><li>Read the recommendation, explanation, source evidence, confidence, and limitations.</li><li>Check that the curriculum and labour-market context match the question being considered.</li><li>Review its current status and decision history.</li></ol>
+          <p class="caution"><strong>Do not:</strong> treat a recommendation or high score as an automatic curriculum decision.</p>
+          <p class="result"><strong>Complete when:</strong> you understand the evidence, limitations, status, and responsible decision owner.</p>
+        </article>
+
+        <article class="task-card" data-roles="analyst admin" data-search="approve reject modify recommendation rationale governance decision">
+          <p class="task-role">Analyst · Admin</p><h2>Record a recommendation decision</h2>
+          <ol><li>Open an eligible recommendation and inspect its complete dossier.</li><li>Select approve, reject, or modify only when permitted by your responsibility.</li><li>Record a clear evidence-based rationale and any required feedback.</li><li>Confirm that the reviewer, decision, and time appear in Decision History.</li></ol>
+          <p class="caution"><strong>Governance rule:</strong> Data Scientists validate model evidence but do not approve curriculum recommendations through this workflow.</p>
+          <p class="result"><strong>Complete when:</strong> the authorised decision and rationale are auditable.</p>
+        </article>
+
+        <article class="task-card" data-roles="analyst data_scientist admin" data-search="upload ingest data source processing quality pipeline data operations">
+          <p class="task-role">Analyst · Data scientist · Admin</p><h2>Ingest and process an approved source</h2>
+          <ol><li>Open <strong>Data Operations</strong> and select the matching source type.</li><li>Confirm the source is authorised and enter its provenance information.</li><li>Upload or start ingestion, then follow the run status.</li><li>Run import/normalisation where required, then generate evidence mappings.</li><li>High-confidence evidence mappings are auto-approved with audit metadata. Review only uncertain or low-confidence mappings shown in the workbench.</li><li>Review quality checks and resolve failures before downstream use.</li></ol>
+          <p class="result"><strong>Complete when:</strong> the run succeeds, provenance is recorded, and no blocking quality issue remains.</p>
+          <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-quality">Section 9 &middot; Quality controls</a></p>
+        </article>
+
+        <article class="task-card" data-roles="analyst data_scientist admin" data-search="Stats SA StatsSA QLFS labour quarterly import 2020 2025 evidence pipeline">
+          <p class="task-role">Analyst &middot; Data scientist &middot; Admin</p><h2>Import and validate Stats SA QLFS evidence</h2>
+          <ol>
+            <li>Open <strong>Data Operations &rarr; StatsSA QLFS</strong>. For the pilot, set 2020&ndash;2025 and 24 files, clear <strong>Discovery only</strong>, and select <strong>Extract tables</strong>.</li>
+            <li>Select <strong>Import StatsSA QLFS</strong> once. Keep the job identifier and wait for the durable job to reach <strong>Completed</strong>; a multi-year extraction can take several minutes.</li>
+            <li>Confirm 24 quarterly publications were seen, no unexplained failures remain, and source URLs, files, hashes, year and quarter are preserved.</li>
+            <li>Select <strong>Run StatsSA Pipeline</strong> for the completed job. Verify every stage completes, then inspect quality results, trend facts and canonical signals.</li>
+            <li>Before using a measure, validate its table title, population, geography, unit, weighting, footnotes, classification version and comparability notes.</li>
+          </ol>
+          <p class="caution"><strong>Evidence boundary:</strong> QLFS is quarterly aggregate labour-force context. It is not vacancy-level skill evidence and must never be relabelled as vacancy counts, monthly skill demand, or direct employer requirements.</p>
+          <p class="result"><strong>Complete when:</strong> source ingestion and pipeline stages complete without blocking quality errors, and every retained observation is traceable to its official publication and table.</p>
+        </article>
+
+        <article class="task-card" data-roles="analyst data_scientist admin" data-search="DPSA vacancy job advert public service proxy skills mapping approval labour pilot">
+          <p class="task-role">Analyst &middot; Data scientist &middot; Admin</p><h2>Run the DPSA public-vacancy proxy pilot</h2>
+          <ol>
+            <li>Open <strong>Data Operations &rarr; Job Advert Dataset</strong> and upload the frozen, authorised DPSA pilot file. Enter its exact source label, Western Cape region and ZA country code; retain the ingestion job identifier.</li>
+            <li>Confirm the job completes, the expected records are cleaned, and each advert keeps its circular, page, official URL and checksum lineage.</li>
+            <li>Run the job-skill pipeline. Inspect each candidate against the advert text, record approve/reject/further-review and add a concise rationale.</li>
+            <li>For researcher-operated prototype review, state that the decision is technical UAT and not independent expert validation.</li>
+            <li>Rerun the pipeline and confirm only approved mappings create demand signals/evidence; candidate and rejected mappings must remain excluded.</li>
+          </ol>
+          <p class="caution"><strong>Scope boundary:</strong> the current five-record DPSA sample is a public-service vacancy proxy from one circular and one provincial department. It is not representative of the whole Western Cape or private-sector ICT labour market and is not sufficient for forecasting.</p>
+          <p class="result"><strong>Complete when:</strong> ingestion, cleaning, review history and approved-only promotion are traceable, and every downstream result carries the public-service proxy limitation.</p>
+        </article>
+
+<article class="task-card" data-roles="analyst data_scientist admin" data-search="Adzuna API academic permission attribution vacancy UAT evidence">
+          <h3>Test the Adzuna API under the academic research permission</h3>
+          <ol>
+            <li>Confirm the source register records the written academic permission (received 2026-09-10): <code>permission_status=written_academic_permission</code>, attribution required at <code>https://www.adzuna.co.za</code>. Evidence: <a href="docs/evidence/adzuna-permission-2026-09-10.md">permission evidence record</a>.</li>
+            <li>Run one bounded query (maximum five results) and retain the ingestion job ID. New runs carry the approved permission metadata plus the attribution requirement; historical rows keep their original trial/UAT acquisition metadata.</li>
+            <li>Run the normal skill pipeline and review every candidate from its actual advert excerpt. Record researcher-operated review reasons; reject category words, advertising phrases and unsupported matches.</li>
+            <li>Rerun the pipeline to prove idempotency: the same pages insert nothing new and report earlier records as duplicates; only approved mappings promote into demand signals/evidence, and the attribution requirement travels with Adzuna signals and demand evidence.</li>
+            <li>Include attribution in any thesis, publication, research, or examiner package: &ldquo;Adzuna South Africa data used under written academic research permission. Source: <a href="https://www.adzuna.co.za" target="_blank" rel="noopener">https://www.adzuna.co.za</a>&rdquo;.</li>
+          </ol>
+<p class="caution"><strong>Attribution boundary:</strong> the written permission (2026-09-10, Adzuna Support) approves use of the Adzuna South Africa API for the CPUT academic study with retention for thesis/analysis and full attribution. Do not claim permission existed before that date, and do not rewrite historical trial/UAT metadata. If permission were refused or expires, an administrator previews and applies the targeted Adzuna purge; the connector and tests remain.</p>
+          <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-providers">Section 8 &middot; Provider configuration</a></p>
+        </article>
+
+        <article class="task-card" data-roles="data_scientist analyst admin" data-search="synthetic provider automated test matrix offline UAT provider=synthetic SYNTHETIC_JOB_BOARD simulated no credentials disconnected">
+          <h3>Exercise the synthetic job-board provider in automated, offline UAT</h3>
+          <ol>
+            <li>The platform exposes a second paginated provider, <code>synthetic</code>, used by the automated test matrix and offline technical UAT. It requires no external credentials and never contacts the Adzuna live API.</li>
+            <li>Point <code>FUTURE_SYNTHETIC_JOBS_BASE_URL</code> at the loopback fixture and call <code>POST /ingestion/adzuna/import-pages?provider=synthetic</code>, then <code>GET /ingestion/adzuna/posts?provider=synthetic</code>.</li>
+            <li>Imported records carry source <code>SYNTHETIC_JOB_BOARD</code>, record type <code>synthetic_job_payload</code> and acquisition mode <code>simulated_uat</code>. They never overwrite or purge stored Adzuna records.</li>
+            <li>Run the normal skill pipeline, mapping review and demand-signal steps: the synthetic path proves the same mechanics end to end. The <strong>Generate demand</strong> button remains disabled until approved mappings exist — approving every candidate in Skills Alignment is the prerequisite.</li>
+            <li>The automated matrix also proves provider boundaries: unknown provider returns 422, a missing base URL 503, unauthenticated requests 401, viewer role 403, empty pages stop the import, a one-off 500 is retried and recovered, 50-row pages ingest fully, and rerunning reports duplicates instead of overwriting.</li>
+            <li><strong>Synthetic outputs are not empirical findings.</strong> They demonstrate the workflow; the <code>simulated_uat</code> source label and governance boundary keep them out of empirical readiness, forecasting and publication gates.</li>
+          </ol>
+          <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-testing">Section 14 &middot; Testing</a></p>
+        </article>
+
+        <article class="task-card" id="task-labour-market-workflow" data-roles="analyst data_scientist admin" data-search="labour market workflow import vacancies Adzuna preview page size page range saved postings pipeline review mappings demand signals outlook inserted duplicate idempotent date filter bounds">
+          <p class="task-role">Analyst &middot; Data scientist &middot; Admin</p>
+          <h2>Run the labour-market workflow</h2>
+          <ol>
+            <li>Open <strong>Data Operations</strong>.</li>
+            <li>Select the <strong>Labour</strong> area.</li>
+            <li>Choose <strong>Import vacancies</strong>.</li>
+            <li>Use <strong>Preview request count</strong> to see how many Adzuna API requests the chosen settings would make before anything runs. Preview never contacts the API.</li>
+            <li>Select the <strong>page size</strong> and <strong>start/end page range</strong>. Page size is 1–50; pages are 1–250 with at most 250 pages per run.</li>
+            <li>Click <strong>Import pages</strong>. Runs longer than 10 pages require an explicit confirmation, because each page is one API request.</li>
+            <li>Browse saved postings with <strong>Show saved Adzuna posts</strong> — records are listed <strong>50 at a time</strong> with previous/next navigation.</li>
+            <li>Return to Labour and choose <strong>Process skills</strong> to run the labour-market skill pipeline on the imported job-posting evidence.</li>
+            <li>Choose <strong>Review mappings</strong> (or "Review mappings in Skills Alignment") and review candidate skill mappings against the actual advert text shown.</li>
+            <li>Choose <strong>Generate demand</strong> to create labour demand signals from approved mappings only. The button stays disabled until approved mappings exist — approving candidate mappings is the prerequisite, and only approved mappings promote into signals/evidence.</li>
+            <li>Open <strong>Demand Outlook</strong> (dashboard forecast view) to view the generated labour demand signals.</li>
+            <li><strong>Inserted vs duplicate counts:</strong> an inserted record is new and saved; a duplicate already existed for the same Adzuna advertisement and is reported as already present (not overwritten).</li>
+            <li><strong>Rerunning is safe:</strong> repeating the same page range inserts nothing new beyond the first run and simply reports the earlier records as duplicates. Nothing is overwritten.</li>
+            <li><strong>Date filters:</strong> if the upstream API has no server-side date filter, the portal applies the date range on the client side after retrieval, and filtered-out records are counted separately.</li>
+            <li><strong>Configured bounds are explicit:</strong> the portal never retrieves unlimited data. The server enforces page size ≤ 50, page number ≤ 250, at most 250 pages per run, and a request rate limit; the preview shows the exact request count and the wall-time estimate before you run.</li>
+          </ol>
+          <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-providers">Section 8 &middot; Provider configuration</a></p>
+        </article>
+        <article class="task-card" id="task-provider-readiness-report" data-roles="analyst data_scientist admin" data-search="provider readiness report acquisition mode signal coverage quarters reviewed mappings labour market read-only">
+          <p class="task-role">Analyst &middot; Data scientist &middot; Admin</p>
+          <h2>View the labour-market provider readiness report</h2>
+          <ol>
+            <li>Call <code>GET /api/v1/labour-market/jobs/provider-readiness-report</code> with a valid token.</li>
+            <li>The report is <strong>read-only</strong>: it never modifies stored postings, mappings, or signals.</li>
+            <li>It lists each job-board provider (for example a synthetic test source and the licensed Adzuna source), its <strong>acquisition mode</strong>, permitted use, <strong>signal coverage</strong> by reporting period (year/quarter), and the number of skill mappings already decided by human review.</li>
+            <li>Only <strong>Analyst, Data Scientist, or Admin</strong> roles may view it; an unauthenticated request is rejected with <code>401</code>.</li>
+            <li>Use it as the readiness gate before promoting labour-market evidence: the report surfaces each provider's acquisition mode, the recorded Adzuna permission record (<code>written_academic_permission</code>, <code>empirical_use_permitted=true</code>) and the <strong>attribution requirement</strong> (<code>https://www.adzuna.co.za</code>). Historical pre-permission rows keep their original trial/UAT metadata and remain auditable.</li>
+          </ol>
+          <p class="caution"><strong>Read-only endpoint:</strong> run it as often as you need; it performs no ingestion, no pipeline run, and no writes.</p>
+          <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-providers">Section 8 &middot; Provider configuration</a></p>
+        </article>
+        <article class="task-card" id="task-labour-recommendations" data-roles="analyst data_scientist admin" data-search="recommendations curriculum gap coverage pending review labour demand evidence training dataset readiness technical UAT snapshot">
+          <p class="task-role">Analyst &middot; Data scientist &middot; Admin</p>
+          <h2>View labour-market curriculum recommendations</h2>
+          <ol>
+            <li>Open <strong>Data Operations</strong> and select the <strong>Labour</strong> area.</li>
+            <li>Complete the earlier steps in order: <strong>Import vacancies</strong>, <strong>Process skills</strong>, <strong>Review mappings</strong>, then <strong>Generate demand</strong>. Steps stay disabled until their prerequisite is met — the Demand Outlook and the Recommendations step unlock once labour demand signals exist.</li>
+            <li>Choose <strong>5. Recommendations</strong> to open the recommendation card.</li>
+            <li>The card links to the curriculum recommendation view (demand-gap and curriculum-coverage recommendations) and to the Demand outlook.</li>
+            <li>Recommendations are deterministic and are created <strong>pending human review</strong>: they are produced only from approved mappings and approved demand evidence, and they never auto-approve curriculum changes.</li>
+            <li>Traceability: each recommendation carries its supporting evidence IDs (demand signals, demand evidence, labour and curriculum mappings), the source and period, an explanation, and a review status.</li>
+          </ol>
+          <p class="caution"><strong>Technical UAT boundary:</strong> the training dataset and baseline used to validate this pipeline run on deterministic synthetic fixtures and trial evidence only; they demonstrate technical behaviour, not empirical model validity.</p>
+          <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-recommendations">Section 11 &middot; Recommendation and decision support</a></p>
+        </article>
+        <article class="task-card" id="task-curriculum-end-to-end" data-roles="analyst data_scientist admin" data-search="curriculum complete workflow upload validate profile evidence approve mapping taxonomy duplicate alias credits nqf checklist">
+          <p class="task-role">Analyst &middot; Data scientist &middot; Admin</p><h2>Complete the curriculum evidence workflow</h2>
+          <ol>
+            <li><strong>Prepare the source:</strong> use an authorised subject guide, syllabus, module descriptor, curriculum map, prospectus, or qualification standard. Confirm the institution, faculty, department, exact programme name, canonical subject code and name, evidence year, NQF level, credits, evidence type, and currency.</li>
+            <li><strong>Upload once:</strong> in <strong>Data Operations &rarr; Curriculum Documents</strong>, select the file and choose <strong>Upload Curriculum File</strong>. Wait for the green accepted-job message and keep the job identifier. The message confirms queue acceptance; it is not final validation. Do not click repeatedly.</li>
+            <li><strong>Wait for extraction:</strong> verify the ingestion job reaches <strong>Completed</strong>, then confirm the document appears under <strong>Curriculum Evidence</strong> with a sensible page/chunk count and <strong>active</strong> status.</li>
+            <li><strong>Validate the subject profile:</strong> open <strong>Subject Profile Validation &rarr; Validate / edit</strong>. Correct the reporting fields, especially the canonical subject code, programme name, NQF level and credits. Read the purpose and prerequisite text, add a concise validation note, select the appropriate status, and save.</li>
+            <li><strong>Validate the document evidence:</strong> under <strong>Curriculum Evidence Validation</strong>, open <strong>Review Evidence</strong>. Check the correct file/version, readable extraction, module coverage, outcomes and assessment evidence. Validate only when the evidence is sufficient; otherwise select <strong>Changes required</strong> and explain the correction.</li>
+            <li><strong>Resolve duplicates and aliases:</strong> compare the programme module total with the validated canonical subject codes. If two codes refer to the same subject, a stale/non-canonical module remains active, or the programme row has the wrong name, stop and request reconciliation. Do not validate both aliases merely to clear the queue.</li>
+            <li><strong>Generate mappings:</strong> after the profiles and document versions are validated, select <strong>Generate Evidence Mappings</strong>. High-confidence matches are auto-approved; uncertain candidates appear in the human review queue.</li>
+            <li><strong>Review every candidate:</strong> approve direct learning outcomes, assessed competencies, and clearly taught curriculum topics. Reject headings, document titles, URLs, bibliography entries, incidental word matches, and broken fragments. Add a short evidence-based note to every decision.</li>
+            <li><strong>Perform the final check:</strong> refresh the workbench and dashboards. Confirm zero outstanding subject profiles, zero unreviewed curriculum versions, zero mapping candidates, no duplicate active modules, and complete module metadata for programme ID, description, credits, NQF level, faculty, and programme name.</li>
+          </ol>
+          <p class="result"><strong>Curriculum preparation is complete when:</strong> the intended documents are active, subject profiles and document evidence are validated, the canonical module count is correct, required metadata is complete, and the human mapping queue is zero.</p>
+<p class="caution"><strong>What comes next:</strong> this completes curriculum-side preparation, not the full alignment study. The national-to-institutional evidence chain still needs applicable CHE/DHET/SAQA and institutional evidence, and independent alignment labelling requires validated labour-market evidence plus two independent reviewers.</p>
+          <p class="sd-ref">System reference: <a href="dashboard.html?view=systemDocumentation#sd-operate">Section 7 &middot; End-to-end operating procedure</a></p>
+        </article>
+
+        <article class="task-card" data-roles="analyst data_scientist admin" data-search="curriculum subject profile validation hierarchy institution faculty department programme qualification code nqf credits outcomes assessments skills">
+          <p class="task-role">Analyst &middot; Data scientist &middot; Admin</p><h2>Validate an uploaded curriculum subject profile</h2>
+          <ol>
+            <li>After the curriculum upload finishes, open <strong>Subject Profile Validation</strong> in <strong>Data Operations</strong>. The default filter shows work that still needs review.</li>
+            <li>Open <strong>Validate / edit</strong> and confirm the institution, faculty, department, programme or qualification name and code, qualification type, subject code and name, evidence year, NQF level, and credits.</li>
+            <li>Read the extracted purpose and articulation or prerequisite text. Correct structured reporting fields when necessary; the original uploaded document and chunks remain unchanged as evidence.</li>
+            <li>Check the row totals for extracted skills, learning outcomes, and assessment evidence. A zero means that the extractor found no evidence of that type; it does not prove that the source document contains none. Inspect the document evidence before accepting a zero.</li>
+            <li>Select <strong>Validated</strong> only when all required reporting fields are complete and accurate. Use <strong>Needs review</strong> or <strong>Changes required</strong> when correction is still needed, and <strong>Rejected</strong> when the upload is not a valid curriculum subject.</li>
+            <li>Enter a brief validation note and save. Validated and rejected records leave the default outstanding-work list but remain available through their filters for audit.</li>
+          </ol>
+          <p class="result"><strong>Complete when:</strong> the profile is validated, appears under the Validated filter, and its hierarchy, identity, NQF, credits, outcomes, assessment evidence, and skills are suitable for reporting.</p>
+        </article>
+        <article class="task-card" data-roles="analyst data_scientist admin" data-search="curriculum governance chain constitution nqf heqsf che dhet pqm saqa subject guide historical current">
+          <p class="task-role">Analyst, Data scientist or Admin</p><h2>Verify the curriculum governance chain</h2>
+          <ol><li>Open <strong>Data Operations</strong> and find National-to-Institutional Curriculum Evidence Chain.</li><li>Confirm the applicable national references and programme-specific CHE, DHET and SAQA evidence.</li><li>Link the institution's approved programme curriculum and current module evidence.</li><li>Record old guides as <strong>Historical / reference only</strong>; do not use them as current decision evidence.</li><li>Resolve missing, conflicting or unverified records with the curriculum owner before interpreting alignment.</li></ol>
+          <p class="caution"><strong>Evidence rule:</strong> SAQA registration identifies the approved qualification but does not replace the university's current programme curriculum, module outcomes or assessment evidence.</p>
+          <p class="caution"><strong>CPUT Applications Development pilot:</strong> select programme code <strong>ADICTA</strong>, not ADICTC (Communication Networks). Use SAQA qualification ID <strong>104714</strong>, NQF Level 7 and 120 credits, and the official CPUT ADICTA prospectus page. Keep CHE accreditation and DHET PQM unverified until their programme-specific official references are obtained.</p>
+          <p class="caution"><strong>Prototype rule:</strong> do not create a verified record merely to turn the chain green. If an official programme-specific reference is unavailable, leave that layer unverified and report it as an empirical limitation. This does not prevent authorised labour-market evidence from being ingested and tested.</p>
+          <p class="caution"><strong>Synthetic technical test:</strong> a synthetic governance fixture may be used only when it is visibly labelled <strong>SYNTHETIC UAT — NOT EMPIRICAL</strong>. It may complete the separate technical-demo indicator, but it is excluded from empirical programme readiness. Replace it with the official institution-specific reference only after ethics and data-sharing conditions permit.</p>
+          <p class="result"><strong>Complete when:</strong> the applicable chain is current, linked, reviewed and identifies its authoritative source at every programme-specific layer.</p>
+        </article>
+
+        <article class="task-card" data-roles="analyst data_scientist admin" data-search="label alignment dataset data operations expert labelling adjudicate disagreement xgboost snapshot">
+          <p class="task-role">Analyst &middot; Data scientist &middot; Admin</p><h2>Label alignment evidence independently</h2>
+          <ol>
+            <li>Open <strong>Data Operations</strong> and find <strong>Independent Alignment Labelling</strong>.</li>
+            <li>First complete <strong>Subject Profile Validation</strong> so the curriculum hierarchy, subject identity, NQF level, credits, outcomes, assessments, and skills are ready for reporting.</li>
+            <li>Then validate the source extraction. Use <strong>Curriculum Evidence Validation</strong> and click <strong>Review Evidence</strong> for a curriculum version.</li>
+            <li>Read the extracted evidence chunks shown in the review window. Do not validate from the chunk count alone. Check whether the visible text is readable, from the correct curriculum version, and complete enough to support labelling.</li>
+            <li>If the source/version is correct, extraction is readable, modules are sufficiently complete, and outcomes or equivalent evidence are present, mark it <strong>Validated</strong>, tick all four evidence checks, confirm the automatically calculated completeness score, and save brief expert notes.</li>
+            <li>If the evidence cannot be inspected, contains spelling/extraction problems that change meaning, misses modules/outcomes, or appears to come from the wrong document/version, choose <strong>Changes required</strong> and describe the correction needed. Do not approve unclear evidence just to continue.</li>
+            <li>After at least one curriculum version is validated, return to <strong>Independent Alignment Labelling</strong> and click <strong>Generate Review Tasks</strong>.</li>
+            <li>Click <strong>Refresh Label Queue</strong>, then open a task with <strong>Open Review</strong>.</li>
+            <li>Compare only the curriculum evidence and labour-market evidence shown. Do not use model predictions as the answer.</li>
+            <li>Choose an alignment label: 1 = no alignment, 2 = weak, 3 = moderate, 4 = strong, 5 = very strong.</li>
+            <li>Choose reviewer confidence from 1 to 5.</li>
+            <li>List present skills found in the curriculum evidence and missing skills suggested by the labour-market evidence.</li>
+            <li>Write a short evidence-based justification explaining why the selected label is appropriate.</li>
+            <li>Submit the review. A second independent reviewer must label the same task; disagreement is routed for adjudication.</li>
+            <li>After enough tasks are completed, a Data Scientist or Administrator locks the reviewed dataset for XGBoost training.</li>
+          </ol>
+          <p class="result"><strong>Complete when:</strong> your independent label and justification are saved, and the queue shows the correct stage. The locked reviewed-label dataset is complete only after paired/adjudicated reviews are finalised.</p>
+          <p class="caution"><strong>Prototype evaluation:</strong> synthetic or researcher-entered UAT labels may be used only to demonstrate that task generation, independent submissions, disagreement handling, adjudication and dataset locking function technically. Label them as test data and exclude them from empirical findings. If qualified independent experts were not recruited, report expert validation and the real reviewed-label dataset as deferred future work.</p>
+        </article>
+
+        <article class="task-card" data-roles="admin" data-search="rbac uat roles viewer analyst data scientist curriculum approver administrator access denied audit">
+          <p class="task-role">Administrator</p><h2>Test every RBAC role</h2>
+          <ol><li>Create one UAT account for Viewer, Analyst, Data Scientist, Curriculum Approver and Administrator, plus a second Analyst for paired-review testing. Include <strong>uat</strong> in each username and use a unique password and email address.</li><li>Sign in separately as each account and confirm its permitted pages and actions.</li><li>Attempt at least one forbidden operation per account and confirm the server returns access denied.</li><li>Using the two Analyst accounts, test one agreement and one disagreement. Confirm reviewer attribution and disagreement routing.</li><li>Confirm the Administrator cannot perform the Curriculum Approver's exclusive academic approval action.</li><li>Export or capture the audit evidence and disclose that the researcher controlled all test identities.</li></ol>
+          <p class="result"><strong>Complete when:</strong> every allowed and denied test has an identity, timestamp, expected result, actual result and evidence reference.</p>
+          <p class="caution"><strong>Validation boundary:</strong> this proves RBAC and workflow behaviour only. Test accounts demonstrate technical operation; they do not represent independent participant validation.</p>
+        </article>
+
+        <article class="task-card" data-roles="data_scientist admin" data-search="train candidate model validate evaluate reject model lab dataset snapshot">
+          <p class="task-role">Data scientist · Admin</p><h2>Train and assess a candidate model</h2>
+          <ol><li>In <strong>Model Lab</strong>, create or select a frozen, leakage-checked dataset snapshot.</li><li>Confirm its row count and 1-5 class distribution before training; labour mappings and reviewed alignment labels are different datasets.</li><li>Start candidate training and monitor the durable background job.</li><li>Review chronological/grouped fold metrics, the non-leaking baseline, errors, calibration, explainability, class imbalance, limitations, and the model card.</li><li>Record test evidence and mark the candidate evaluated only if the evidence supports that state; otherwise retain or reject it with a reason.</li><li>Submit for Administrator approval only when every promotion gate passes. Never represent a candidate as active merely because training completed.</li></ol>
+          <p class="caution"><strong>Separation of duties:</strong> a Data Scientist prepares and evaluates the candidate. Only an Administrator can approve, activate, or roll back a model.</p>
+          <p class="result"><strong>Complete when:</strong> the candidate has a reproducible evidence record and a clear evaluated or rejected lifecycle state.</p>
+        </article>
+
+        <article class="task-card" data-roles="analyst data_scientist admin" data-search="saved evidence snapshot report archive point in time drill down">
+          <p class="task-role">Analyst · Data scientist · Admin</p><h2>Inspect a saved evidence snapshot</h2>
+          <ol><li>Open <strong>Reports &amp; Exports</strong>.</li><li>Under Saved Evidence Snapshots, locate the relevant report type and creation time.</li><li>Select <strong>View</strong> to inspect its creator, notes, captured summary, and full payload.</li><li>Compare snapshots when you need to show what the system knew at different times.</li></ol>
+          <p class="result"><strong>Purpose:</strong> saved snapshots support traceability, reproducibility, investigation, and audit; they are not decorative report history.</p>
+        </article>
+
+        <article class="task-card" data-roles="analyst data_scientist admin" data-search="normalisation rule normalizer read only version purpose transformation">
+          <p class="task-role">Analyst · Data scientist · Admin</p><h2>Verify the active normalisation rule</h2>
+          <ol><li>Open <strong>Data Operations</strong> and find Normalisation Rules.</li><li>Confirm the rule key, version, accepted input, output record type, purpose, and status.</li><li>Use job and lineage evidence to confirm which version processed a dataset.</li><li>Request a tested backend release if a transformation must change.</li></ol>
+          <p class="caution"><strong>Current control:</strong> rules are intentionally read-only in the portal. A change can affect every downstream result and therefore requires testing, versioning, review, and rollback planning.</p>
+        </article>
+
+        <article class="task-card" data-roles="admin" data-search="approve promote activate rollback model administrator separation duties">
+          <p class="task-role">Admin</p><h2>Approve or activate an evaluated model</h2>
+          <ol><li>In <strong>Model Lab</strong>, select an evaluated candidate prepared by a Data Scientist.</li><li>Independently inspect its dataset fingerprint, test evidence, metrics, baseline comparison, limitations, and promotion gates.</li><li>Approve only when every required gate passes and the evidence supports activation.</li><li>Promote the approved candidate and verify serving continuity; use rollback only when a documented incident requires it.</li></ol>
+          <p class="caution"><strong>Do not:</strong> approve merely because training completed or one metric improved.</p>
+          <p class="result"><strong>Complete when:</strong> activation or rollback is recorded with the administrator, model version, evidence, and time.</p>
+        </article>
+
+        <article class="task-card" data-roles="admin" data-search="approve user access request assign role admin pending">
+          <p class="task-role">Admin</p><h2>Approve an access request</h2>
+          <ol><li>Open <strong>User Admin</strong> and the Pending tab.</li><li>Verify the requester’s identity and required responsibilities.</li><li>Assign the least-privileged suitable role: Viewer, Analyst, Data Scientist, or Administrator.</li><li>Add an approval note when useful and confirm approval.</li></ol>
+          <p class="caution"><strong>Role rule:</strong> Analysts use decision and data operations; model training belongs to Data Scientists and Administrators.</p>
+          <p class="result"><strong>Complete when:</strong> the user appears as Approved with the intended role.</p>
+        </article>
+
+        <article class="task-card" data-roles="admin" data-search="system health performance cpu memory disk latency database queue failure backup duration uptime deployment readiness uat operations">
+          <p class="task-role">Admin</p><h2>Check operational readiness</h2>
+          <ol><li>Open <strong>System Operations</strong>.</li><li>Select <strong>Measure Performance</strong> to inspect CPU, memory, disk use, API latency, database connections, job queue, recent failure rate, backup duration, API error rate, and service uptime. Warning and critical thresholds identify measurements that need investigation.</li><li>Run Health Evaluation to check current database, worker, ingestion, source, and backup alerts. Acknowledgement assigns investigation; it does not fix the alert.</li><li>Queue an encrypted backup, then load Backup Status. Run an isolated restore test only when the portal confirms temporary-database authority; the live database is never the restore target.</li><li>Load Environment &amp; Release Readiness. Treat templates as configuration evidence only: verify installed certificate files, the live HTTPS endpoint, secrets, and monitoring in the target environment.</li><li>Load Rollback Status before rehearsing. Application rehearsal verifies a release bundle; migration rehearsal uses a generated temporary database and remains blocked without separate authority.</li><li>Run Portal UAT to record role, page, API, and safety-control acceptance evidence. It is not a performance test or model-accuracy test.</li></ol>
+          <p class="caution"><strong>Performance scope:</strong> these are live measurements from the current backend and database. API totals and uptime reset when the backend restarts; production history and alert delivery still require the external monitoring service.</p>
+          <p class="result"><strong>Complete when:</strong> required checks pass or every exception has an owner and documented action.</p>
+        </article>
+
+        <article class="task-card" data-roles="admin" data-search="production handover checklist security backup restore health uat deployment">
+          <p class="task-role">Admin</p><h2>Complete a production-readiness handover</h2>
+          <ol><li>Confirm only approved users retain the minimum roles required for their responsibilities.</li><li>Verify the active model and dataset fingerprints, promotion evidence, serving continuity, and rollback target.</li><li>Run service-health, backup-manifest, restoration-readiness, deployment, and UAT checks in the target environment.</li><li>Confirm secrets are externally managed, HTTPS is enabled, monitoring has an owner, and scheduled jobs have failure alerts.</li><li>Record every exception, owner, mitigation, and approval before opening access to users.</li></ol>
+          <p class="caution"><strong>Production gate:</strong> a page loading successfully is not proof of readiness. Access control, recoverability, traceability, monitoring, and validated decision evidence must all be demonstrated.</p>
+          <p class="result"><strong>Complete when:</strong> the operational evidence package identifies the environment, date, administrator, checks performed, results, exceptions, and approval decision.</p>
+        </article>
+      </div>
+      <div id="noManualResults" class="no-results hidden">No matching procedure was found. Try a shorter term or select another role.</div>
+
+      <section class="faq" id="faqSection" aria-labelledby="faq-title">
+        <div class="role-guide-heading">
+          <p class="eyebrow">Common questions</p>
+          <h2 id="faq-title">Frequently asked questions</h2>
+          <p>Select a question to reveal the answer. If your question is not here, contact the platform administrator with the page name and any message shown.</p>
+        </div>
+        <div class="faq-controls">
+          <button class="btn sm" id="faqExpandAll" type="button">Expand all</button>
+          <button class="btn sm" id="faqCollapseAll" type="button">Collapse all</button>
+        </div>
+        <details>
+          <summary>Why is my data ingestion job showing as &quot;Failed&quot; or stuck on &quot;Pending&quot;?</summary>
+          <div class="faq-answer">
+            <p><em>Pending</em> means the job is queued behind other work &mdash; it will start automatically; no action is needed. <em>Failed</em> means the run stopped and recorded why.</p>
+            <p>To diagnose a failure: open the job row in <strong>Data Operations &rarr; Ingestion Jobs</strong>, expand the failure detail, and check the most common causes in order:</p>
+            <ul>
+              <li><strong>Duplicate file:</strong> the same content (identical checksum) was already ingested. The system blocks duplicates by design.</li>
+              <li><strong>Contract mismatch:</strong> the file does not match the source contract's expected columns/format. Compare against the contract's validation schema and fix the file, not the contract, unless the source genuinely changed (contract owners can version contracts).</li>
+              <li><strong>Unreadable file:</strong> password-protected PDFs, scanned images without text, or corrupt archives cannot be extracted.</li>
+              <li><strong>Empty extract:</strong> zero usable records after parsing &mdash; verify the file is the correct document for the selected source.</li>
+            </ul>
+            <p>After fixing the cause, use <strong>Retry</strong>. Failed jobs keep their diagnostics for audit, so nothing is lost by retrying.</p>
+          </div>
+        </details>
+        <details>
+          <summary>What does the &quot;Gap Score&quot; mean, and how should I interpret it?</summary>
+          <div class="faq-answer">
+            <p>The Gap Score measures vocabulary distance between what a curriculum module teaches and what the labour market demands. It is calculated as <code>1 &minus; cos(c, d)</code>, where <code>c</code> and <code>d</code> are TF-IDF vectors of the curriculum text and demand text respectively:</p>
+            <ul>
+              <li><strong>0</strong> &mdash; the texts are perfectly aligned in vocabulary (identical direction).</li>
+              <li><strong>1</strong> &mdash; completely different vocabulary (orthogonal).</li>
+            </ul>
+            <p>In practice: scores near 0&ndash;0.3 suggest strong topical overlap; middling values suggest partial coverage; high values flag potential gaps worth human review. It is a <strong>descriptive screening signal, not a verdict</strong> &mdash; wording differences alone can raise the score. Always open the gap evidence drill-down (curriculum, trends and current-jobs groups) before drawing conclusions, and treat SHAP-backed alignment scores and expert review as the deciding evidence.</p>
+          </div>
+        </details>
+        <details>
+          <summary>I am a Curriculum Approver, but I don't see the &quot;Approve&quot; button on a recommendation. Why?</summary>
+          <div class="faq-answer">
+            <p>Check these in order:</p>
+            <ol>
+              <li><strong>Your account may lack the approver role yet.</strong> Open your profile (top bar) or ask an administrator which roles are assigned; only <em>curriculum_approver</em> unlocks final academic approval.</li>
+              <li><strong>The recommendation may not be at the approval stage.</strong> Items still under review, already rejected, or awaiting modification do not show approval controls. Check its status and history in the dossier.</li>
+              <li><strong>You may be viewing a read-only surface.</strong> Decision History shows past decisions; actions are only available in the Recommendations workspace on eligible items.</li>
+            </ol>
+            <p>If you believe your role is set correctly and the item is eligible, sign out and back in to refresh your session token, then reload. Access checks are enforced server-side &mdash; if the server does not grant the permission, the button stays hidden even for administrators, by design.</p>
+          </div>
+        </details>
+        <details>
+          <summary>How do I reset my password or update my profile?</summary>
+          <div class="faq-answer">
+            <p><strong>Password change (signed in):</strong> use <strong>Change Password</strong> in the top bar of any portal page. You'll need your current password; the new one requires a minimum of 8 characters.</p>
+            <p><strong>Password reset (locked out):</strong> contact the platform administrator. An administrator can issue a reset from <strong>User Admin</strong>. For security there is no self-service email reset in this deployment.</p>
+            <p><strong>Profile details (name/email):</strong> these follow your institutional identity and are updated by an administrator. Note that changing your email usually invalidates active sessions, so expect to sign in again.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Why can't I see Model Lab, Data Operations or System Operations in my menu?</summary>
+          <div class="faq-answer">
+            <p>The sidebar renders only the workspaces your role includes. Viewers see decision surfaces only; Data Operations appears for Analysts and above; Model Lab for Data Scientists and Admins; System Operations and User Admin for Admins only. This is intentional least-privilege access, not a fault. If your responsibilities require more access, ask an administrator to review your role assignment &mdash; they will assign the minimum role that covers the task.</p>
+          </div>
+        </details>
+        <details>
+          <summary>A model is labelled &quot;candidate&quot;. Why can't anyone activate it immediately?</summary>
+          <div class="faq-answer">
+            <p>Every training run produces a <em>candidate</em>: an evaluated but non-active model stored with its full evidence (metrics, cross-validation folds, baseline comparisons, fairness findings, limitations). Activation requires a separate, authorised promotion decision after gates pass. This separation prevents one good-looking holdout number from silently changing production behaviour, keeps an auditable trail of who activated what, and preserves a rollback target. Data Scientists prepare candidates; Administrators promote them &mdash; and neither role can bypass the evidence gates.</p>
+          </div>
+        </details>
+        <details>
+          <summary>The XGBoost candidate trained successfully, but its scores are poor. Is the system broken?</summary>
+          <div class="faq-answer">
+            <p>No. Training completion proves that the locked-dataset, training, evaluation, explainability and registry mechanisms operate. Predictive quality is a separate question. In the current snapshot, only 40 of 993 rows are positive (4.03%); the worst chronological-fold F1 is 0, mean chronological-fold F1 is 0.0192 and ECE is 0.1184. Those results correctly block promotion.</p>
+            <p>Preserve the candidate and metrics as technical validation evidence. Improve future predictive evidence by adding genuinely different curriculum programmes or institutions, retaining real dates and groups, and obtaining more independently useful positive examples. Do not duplicate vacancies or relabel rows merely to improve a score.</p>
+          </div>
+        </details>
+        <details>
+          <summary>How do I create the final recommendation PDF?</summary>
+          <div class="faq-answer">
+            <ol><li>Sign in as a Curriculum Approver and open <strong>Recommendations</strong>.</li><li>Confirm the four committee-governance checks are all <strong>ready</strong>.</li><li>Select <strong>Generate committee evidence pack</strong>.</li><li>Keep the success message's report ID and store the downloaded PDF with the evidence package.</li><li>Verify that the PDF shows the report and manifest hashes, included recommendations, decision reasons, reviewer identity/role, timestamps, evidence fingerprints and limitations.</li></ol>
+            <p>If the button is missing, sign out and in again so the current role is loaded. If readiness is blocked, complete the named evidence or review gate; do not bypass it.</p>
+          </div>
+        </details>
+        <details>
+          <summary>A validation screen shows zero skills / outcomes / assessments. Is my document missing content?</summary>
+          <div class="faq-answer">
+            <p>Not necessarily. A zero means <em>the extractor found no evidence of that type</em> &mdash; it does not prove the source document contains none. Extraction depends on scan quality and document structure. Before accepting or rejecting, click through to the extracted chunks in the validation window and inspect the actual text. If the text is unreadable or incomplete, choose <strong>Changes required</strong> with a note rather than validating blindly.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Where is the full end-to-end documentation for the system?</summary>
+          <div class="faq-answer">
+            <p>The complete ordered guide &mdash; all 21 workflows, the role matrix, the two overview diagrams, and the evidence index &mdash; lives in <strong>Decision Portal &rarr; System Documentation</strong>. Use it to trace any task from registration through source ingestion and validation to recommendations, decisions, and exports.</p>
+            <p>The guide records only implemented behaviour and separates four evidence classes: <em>technical UAT</em> (operator-run reproducibility tests), <em>synthetic</em> (simulated offline data), <em>public evidence</em> (official sources with provenance), and <em>future institutional validation</em>. Items that are not yet validated are listed explicitly rather than implied.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Can I rely on the forecast numbers for planning?</summary>
+          <div class="faq-answer">
+            <p>Treat forecasts as directional indicators, not guarantees. Every forecast carries a maturity status and explicit limitations based on how much history exists. Short histories produce prototype-grade output that proves the pipeline works but should not be quoted as predictive evidence. Always read the confidence, method and limitation notes shown alongside each forecast, and prefer the transparent baseline comparisons when judging trustworthiness.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Where do exported reports go, and who can see saved snapshots?</summary>
+          <div class="faq-answer">
+            <p>Exports download directly to your browser's download folder (CSV/PDF/JSON depending on the report row buttons). Saved Evidence Snapshots are generated reports stored inside the platform &mdash; find them under <strong>Reports &amp; Exports &rarr; Saved Evidence Snapshots</strong>. Each snapshot captures what the system knew at that moment (creator, notes, payload), making them suitable for committee packs, audit and reproducibility. Snapshot visibility follows your role's report permissions.</p>
+          </div>
+        </details>
+      </section>
+
+      <section class="manual-support">
+        <div><h2>Still unsure?</h2><p>Contact the FUTURE Platform administrator and include the page, task, and message shown. Never include your password.</p></div>
+        <a class="btn" href="user-guide.html">Open the public overview</a>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="help-manual.js"></script>
+</body>
+</html>
+
