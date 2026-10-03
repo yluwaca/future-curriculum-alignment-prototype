@@ -239,7 +239,7 @@ def test_synthetic_provider_end_to_end(client, synthetic_env, sqlite_db, monkeyp
     assert len(db_signals) >= 1
     for signal in db_signals:
         assert signal.method == "job_skill_demand_v1"
-        assert signal.unit == "job_postings"
+        assert signal.unit == "normalised_posting_count"
         assert signal.signal_metadata["evidence_scope"] == "job_vacancy_evidence"
         assert signal.signal_metadata["empirical_use_permitted"] is True
         assert signal.signal_metadata["research_use"] == "empirical_subject_to_source_governance"
