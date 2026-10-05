@@ -324,19 +324,25 @@ def create_pdf(path: Path, output: dict, comparison: pd.DataFrame, metric_payloa
     styles.add(ParagraphStyle(name="ReportTitle", parent=styles["Title"], fontName="Helvetica-Bold", fontSize=18, leading=22, textColor=colors.HexColor("#17365D"), spaceAfter=7))
     styles.add(ParagraphStyle(name="Subhead", parent=styles["Heading2"], fontName="Helvetica-Bold", fontSize=10, leading=13, textColor=colors.HexColor("#1F4E79"), spaceBefore=7, spaceAfter=4))
     styles.add(ParagraphStyle(name="BodySmall", parent=styles["BodyText"], fontSize=8.5, leading=11, spaceAfter=4))
+    styles.add(ParagraphStyle(name="IdentityCell", parent=styles["BodyText"], fontName="Helvetica", fontSize=6.6, leading=8, splitLongWords=1))
+    styles.add(ParagraphStyle(name="IdentityLabel", parent=styles["IdentityCell"], fontName="Helvetica-Bold"))
     styles.add(ParagraphStyle(name="Banner", parent=styles["BodyText"], fontName="Helvetica-Bold", fontSize=9, leading=11, textColor=colors.HexColor("#7F1D1D"), backColor=colors.HexColor("#FDECEC"), borderColor=colors.HexColor("#E8A0A0"), borderWidth=0.6, borderPadding=6, spaceAfter=7))
     doc = SimpleDocTemplate(str(path), pagesize=A4, rightMargin=16*mm, leftMargin=16*mm, topMargin=14*mm, bottomMargin=17*mm, title="FUTURE Forecast Functional Verification")
     story = [Paragraph("FUTURE | Forecast Functional Verification", styles["ReportTitle"]), Paragraph("DEMONSTRATION DECISION-SUPPORT OUTPUT - NO INSTITUTIONAL ACTION AUTHORISED", styles["Banner"]), Paragraph("Evidence identity", styles["Subhead"])]
-    identity = [
+    identity_values = [
         ["Run ID", output["run_id"], "Output ID", output["output_id"]],
         ["Evidence class", output["evidence_class"], "Review status", output["human_review_status"]],
         ["Dataset", output["dataset_id"], "Model", f"{output['model']} v{output['model_version']}"],
-        ["Dataset SHA-256", output["dataset_sha256"], "Forecast ID", output["forecast_id"]],
+        ["Dataset SHA-256", "<br/>".join(output["dataset_sha256"][index:index + 16] for index in range(0, len(output["dataset_sha256"]), 16)), "Forecast ID", "<br/>".join(output["forecast_id"][index:index + 12] for index in range(0, len(output["forecast_id"]), 12))],
         ["Observation window", output["observation_period"], "Target", output["forecast_target_period"]],
         ["Series", f"{output['series_id']}: {output['series_definition']}", "Point forecast", f"{output['point_forecast']:.3f}"],
         ["Training cutoff / rows", f"{output['training_target_end']} / {output['training_rows']}", "Origin", output["origin_period"]],
     ]
-    ident = Table(identity, colWidths=[29*mm, 63*mm, 27*mm, 53*mm])
+    identity = [
+        [Paragraph(str(value), styles["IdentityLabel"] if column in (0, 2) else styles["IdentityCell"]) for column, value in enumerate(row)]
+        for row in identity_values
+    ]
+    ident = Table(identity, colWidths=[29*mm, 67*mm, 27*mm, 49*mm])
     ident.setStyle(TableStyle([("BACKGROUND", (0,0), (0,-1), colors.HexColor("#EAF0F6")), ("BACKGROUND", (2,0), (2,-1), colors.HexColor("#EAF0F6")), ("FONTNAME", (0,0), (0,-1), "Helvetica-Bold"), ("FONTNAME", (2,0), (2,-1), "Helvetica-Bold"), ("FONTSIZE", (0,0), (-1,-1), 6.8), ("LEADING", (0,0), (-1,-1), 8.5), ("GRID", (0,0), (-1,-1), 0.3, colors.HexColor("#CFD8E3")), ("VALIGN", (0,0), (-1,-1), "TOP"), ("LEFTPADDING", (0,0), (-1,-1), 4), ("RIGHTPADDING", (0,0), (-1,-1), 4), ("TOPPADDING", (0,0), (-1,-1), 4), ("BOTTOMPADDING", (0,0), (-1,-1), 4)]))
     story.extend([ident, Paragraph("Final-horizon comparison", styles["Subhead"]), Paragraph("Twelve common final targets (four series x three held-out months). Lower MAE, RMSE and sMAPE are better. Synthetic-only diagnostics.", styles["BodySmall"])])
 
