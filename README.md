@@ -36,7 +36,9 @@ The public source repository does not automatically include the examiner/eSango 
 
 ## Reproducibility
 
-The controlled examiner/eSango package identifies the locked dataset and evaluated candidate with complete SHA-256 fingerprints. A controlled reproducibility rerun over the same immutable 993-row snapshot retained row-level holdout and fold probabilities, exact split membership, the native rerun model artefact, software versions and checksums. F1 and confusion-matrix counts reproduced exactly; small differences in probability-sensitive metrics are reported transparently. Release `v1.0.1-thesis-evidence` freezes the complete evidence-export workflow.
+The controlled examiner/eSango package identifies the locked dataset and evaluated candidate with complete SHA-256 fingerprints. A controlled reproducibility rerun over the same immutable 993-row snapshot retained row-level holdout and fold probabilities, exact split membership, the native rerun model artefact, software versions and checksums. F1 and confusion-matrix counts reproduced exactly; small differences in probability-sensitive metrics are reported transparently. Release `v1.0.2-operational-verification` is the current frozen alignment and operational reference and is not moved by the forecasting work.
+
+Forecasting is documented and evaluated in a separately identifiable package. The dated Adzuna store did not meet the regular longitudinal-panel gate, so release `v1.1.0-forecast-functional-verification` uses a deterministic synthetic panel to verify validation, leakage-controlled rolling origins, an executable prototype LSTM architecture and ridge candidate, common baselines, period-level evidence, and an evidence-linked output. This demonstrates functional execution and traceability, not empirical labour-market forecast accuracy. See `docs/FORECAST_FUNCTIONAL_VERIFICATION.md`.
 
 ## Citation
 
